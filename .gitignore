@@ -124,6 +124,7 @@ latex.out/
 _minted*/
 _minted-*/
 *.pyg
+*.data.minted
 
 # morewrites
 *.mw
@@ -298,3 +299,12 @@ __pycache__/
 # CONFIGURACIÓN LOCAL (credenciales y opciones personales)
 # ============================================================================
 .env
+
+# ============================================================================
+# CLAUDE CODE
+# ============================================================================
+# Memoria persistente de Claude Code (datos personales, notas, no versionar)
+memory/
+
+# Salidas auxiliares de luamml (paquete LaTeX)
+*-luamml-mathml.html
