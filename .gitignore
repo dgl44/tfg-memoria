@@ -209,10 +209,11 @@ pythontex-files-*/
 build/
 out/
 
-# PDFs generados (descomenta si no quieres versionarlos)
-# *.pdf
+# PDFs generados (no versionar las compilaciones recientes)
+*.pdf
 
-# main.pdf se versiona como ejemplo del documento compilado
+# Excepción: el PDF de ejemplo de la plantilla original sí se versiona
+!main-template-example.pdf
 
 # ============================================================================
 # ARCHIVOS TEMPORALES Y RESPALDO
