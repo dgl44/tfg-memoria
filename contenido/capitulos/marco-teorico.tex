@@ -1,4 +1,330 @@
-\chapter{Marco teórico y estado del arte}
-\label{cap:marco-teorico}
+\chapter{Estado del arte}
+\label{cap:estado-arte}
 
-% TODO: Redactar el marco teórico y estado del arte.
+% =============================================================================
+% BORRADOR (versión inicial, 2026-06-02) — REESCRIBIR A TU ESTILO.
+%
+% Este texto es un primer borrador para que veas la dirección y el hilo
+% argumental. NO lo dejes tal cual: reescríbelo con tus propias palabras,
+% reorganiza párrafos, añade matices personales. El objetivo es que la
+% memoria suene a TI, no a un LLM.
+%
+% Las citas ya están colocadas donde corresponden. Si reordenas párrafos,
+% asegúrate de que cada cita siga siendo coherente con el texto que la
+% rodea.
+% =============================================================================
+
+
+% -----------------------------------------------------------------------------
+\section{Introducción}
+\label{sec:estado-arte-intro}
+
+La generación automática de preguntas (AQG, por sus siglas en inglés
+\emph{Automatic Question Generation}) es un tema de investigación con
+muchos años de recorrido en el ámbito del procesamiento del lenguaje natural y
+la tecnología educativa. Tradicionalmente era abordada mediante plantillas
+sintácticas y técnicas estadísticas, pero a partir de 2022 con la introducción de los modelos de lenguaje de gran tamaño (\emph{Large Language Models}, LLMs), esta disciplina ha experimentado un cambio importante en su calidad, ya que estos son capaces de producir contenido educativo comparable a la del docente humano
+en algunos escenarios.
+
+En el contexto específico de la educación en informática, los LLMs han
+abierto la posibilidad de generar automáticamente ejercicios de
+programación, explicaciones de código y preguntas de evaluación sobre
+material técnico, transformando un campo que tradicionalmente requería un
+esfuerzo manual elevado por parte del profesorado~\parencite{raihan2025llmcse}.
+Sin embargo, la misma intrusión de la inteligencia artificial generativa
+que habilita estas herramientas plantea un problema docente nuevo: si los
+estudiantes pueden utilizar estos modelos para resolver sus prácticas, ¿cómo
+nos aseguramos de que realmente han comprendido lo que entregan?
+
+En este capítulo voy a repasar el estado del arte siguiendo estos dos ejes.
+Primero se analiza la evolución de la generación automática de preguntas
+con LLMs, con especial atención a su aplicación a código fuente
+(secciones~\ref{sec:aqg-llms} y~\ref{sec:aqg-codigo}). A continuación se
+revisa la literatura reciente sobre integridad académica y evaluación
+auténtica en la era de la IA generativa (sección~\ref{sec:integridad-academica}),
+así como los primeros trabajos que abordan específicamente la generación de
+preguntas sobre código entregado por estudiantes
+(sección~\ref{sec:viva-llm}). Por último, se examina el panorama en el
+contexto académico español (sección~\ref{sec:trabajos-espana}), se introduce
+brevemente el ecosistema de frameworks multi-agente
+(sección~\ref{sec:frameworks-multiagente}) y se establece la aportación
+concreta de este Trabajo Fin de Grado
+(sección~\ref{sec:posicionamiento}).
+
+
+% -----------------------------------------------------------------------------
+\section{Generación automática de preguntas con LLMs}
+\label{sec:aqg-llms}
+
+La generación automática de preguntas se planteaba clásicamente como un
+problema de procesamiento del lenguaje natural en el que, dado un texto,
+un sistema identificaba sintagmas relevantes y los reformulaba mediante
+plantillas predefinidas. La revisión sistemática de
+\textcite{kurdi2020aqgreview}, que examina 93 trabajos publicados entre
+2015 y 2019, constata que estos enfoques producían preguntas correctas
+gramaticalmente pero presentaban deficiencias en la
+variedad de formatos generados, el control de la dificultad y la
+automatización del proceso.
+
+La aparición de modelos de lenguaje generativos como Codex, GPT-3 y sus
+sucesores reabre el campo. El trabajo de \textcite{sarsa2022autogen},
+señalado en revisiones posteriores por ofrecer los resultados más
+detallados sobre generación de ejercicios de programación con
+LLMs~\parencite{frankford2024survey}, mostró en ICER~2022 que un LLM
+podía generar, a partir de un único prompt, un ejercicio de programación completo: enunciado, solución modelo, casos de prueba y explicación del código en lenguaje natural. Los autores constataron que la mayor parte del contenido generado era novedoso y utilizable, aunque identificaron también la necesidad de supervisión humana antes de su uso en aulas reales.
+
+A partir de aquí han ido apareciendo otros surveys que recogen los
+avances en este campo. \textcite{frankford2024survey} presenta una revisión del
+estado del arte en generación de ejercicios de programación con LLMs,
+proponiendo una matriz de evaluación con criterios organizados en tres
+ejes —aspectos generales del modelo (coste, privacidad, rendimiento en
+benchmarks), calidad del código generado y aspectos pedagógicos
+cualitativos— que sirve como marco para comparar y elegir el LLM más
+adecuado en cada contexto docente. Más allá de la matriz comparativa, el survey señala un
+problema especialmente relevante para la evaluación docente: los mismos
+modelos capaces de generar los ejercicios son también capaces de
+resolverlos con facilidad, lo que cuestiona la utilidad de estos
+materiales como instrumento de evaluación cuando los estudiantes tienen
+acceso al mismo tipo de modelo.
+
+En paralelo, la revisión sistemática de \textcite{raihan2025llmcse}
+contextualiza este fenómeno dentro de la transformación más amplia que
+los LLMs están produciendo en la educación de informática, identificando
+ámbitos de aplicación, oportunidades, retos pendientes y direcciones
+futuras de investigación. Estas dos revisiones sirven en lo sucesivo
+como marco panorámico de referencia.
+
+
+% -----------------------------------------------------------------------------
+\section{Generación de ejercicios y preguntas a partir de código fuente}
+\label{sec:aqg-codigo}
+
+Dentro del campo general descrito en la sección anterior, la línea más
+próxima al Trabajo Fin de Grado que se presenta es la que se ocupa
+específicamente de generar ejercicios o preguntas a partir de código
+fuente. El trabajo de \textcite{sarsa2022autogen} se enmarca aquí, así
+como los desarrollos posteriores que han refinado su enfoque.
+
+Especialmente relevante es el sistema ExGen, descrito por
+\textcite{ta2026exgen}. ExGen genera ejercicios de programación
+introductoria personalizados para estudiantes individuales mediante la
+combinación de varias estrategias de \emph{prompting} y, sobre todo,
+mediante una cadena de filtros automáticos que descarta los candidatos
+de baja calidad antes de ofrecerlos al estudiante. Esta cadena de
+filtrado es conceptualmente equivalente al patrón
+\emph{generator-critic} (también llamado \emph{reflection pattern}) que
+se utiliza en este TFG, aunque los autores no la formalizan como un
+sistema multi-agente explícito. La validación experimental de ExGen,
+realizada sobre más de 1\,400 ejercicios en Python, demuestra que el
+filtrado encadenado mejora significativamente la tasa de ejercicios
+utilizables respecto a una generación cruda sin postprocesado.
+
+A pesar de la madurez creciente de estos enfoques, todos ellos comparten
+un objetivo común: generar ejercicios \emph{nuevos} para que el
+estudiante los resuelva. Es decir, parten de un dominio temático (por
+ejemplo, \emph{«bucles en Python»}) y producen un enunciado de problema
+junto a su solución. Esta orientación, sin embargo, no responde
+directamente al problema que motiva el presente Trabajo Fin de Grado:
+evaluar la comprensión que un estudiante tiene sobre un código que él
+mismo ha entregado previamente. El siguiente apartado contextualiza este
+problema dentro de un debate más amplio.
+
+
+% -----------------------------------------------------------------------------
+\section{Integridad académica y evaluación auténtica en la era de la IA generativa}
+\label{sec:integridad-academica}
+
+La popularización de modelos generativos como ChatGPT, GitHub Copilot o
+Claude ha alterado profundamente el escenario de evaluación en los
+estudios de informática. Estos modelos son capaces de producir código
+funcional, completo y bien estructurado a partir de descripciones en
+lenguaje natural, lo que permite a un estudiante entregar un proyecto
+satisfactorio sin haber participado de manera significativa en su
+diseño, implementación o comprensión. Las técnicas tradicionales de
+detección automática de plagio resultan poco eficaces frente a este
+fenómeno, dado que el código generado no proviene de otro estudiante
+ni de un repositorio conocido, sino que se sintetiza \emph{de novo} para
+cada consulta.
+
+Frente a este reto, la literatura reciente propone reorientar la
+evaluación hacia formas \emph{auténticas} (\emph{authentic assessment})
+que sean difíciles de delegar en una IA. Una de las estrategias más
+prometedoras consiste en verificar directamente la comprensión que el
+estudiante tiene sobre el código que ha entregado, mediante preguntas
+dirigidas al contenido concreto de su proyecto.
+
+En esta línea, el modelo \emph{open and verify} propuesto por
+\textcite{chung2026openai} resulta especialmente significativo. El autor
+defiende permitir explícitamente el uso de IA generativa durante el
+desarrollo de las prácticas de programación, pero combinarlo con
+cuestionarios escritos realizados en clase, en condiciones controladas,
+en los que las preguntas se construyen específicamente sobre el código
+entregado por cada estudiante. Los tipos de pregunta que propone
+incluyen, literalmente, describir el algoritmo implementado en
+pseudocódigo, completar líneas omitidas de un fragmento dado, explicar
+un rango concreto de líneas, o anticipar la salida de un trozo de
+código. La validación empírica realizada en su asignatura no encuentra
+correlación significativa entre el porcentaje declarado de uso de IA y
+la puntuación en los cuestionarios de verificación, lo que sustenta la
+viabilidad de este modelo de evaluación.
+
+La limitación práctica más evidente del enfoque de Chung es la carga de
+trabajo que supone para el docente: diseñar manualmente preguntas
+específicas para el proyecto de cada estudiante resulta inviable en
+asignaturas con matrículas elevadas. Es precisamente en esta limitación
+donde se sitúa la motivación del presente Trabajo Fin de Grado.
+
+
+% -----------------------------------------------------------------------------
+\section{Generación automática de preguntas sobre código del estudiante}
+\label{sec:viva-llm}
+
+La idea de utilizar LLMs para generar preguntas dirigidas al código
+concreto de un estudiante, en lugar de a un dominio temático genérico,
+es muy reciente y cuenta todavía con pocos antecedentes en la
+literatura. El más cercano al planteamiento de este TFG es el sistema
+TAMIGO presentado por \textcite{anishka2024tamigo}.
+
+TAMIGO está diseñado para asistir a los \emph{teaching assistants} en
+la realización de pruebas orales (\emph{viva voce}) sobre proyectos de
+programación entregados por estudiantes. El asistente docente selecciona
+un bloque concreto de código y TAMIGO genera, mediante un LLM,
+preguntas adaptadas a ese fragmento, así como retroalimentación sobre
+las respuestas que el estudiante proporciona. Los autores reportan que
+la generación de preguntas resulta \emph{«altamente efectiva»} cuando se
+proporciona al modelo contexto suficiente; los resultados sobre la
+generación de retroalimentación, en cambio, son más mixtos debido a
+fenómenos de alucinación.
+
+Aunque TAMIGO constituye el antecedente más directo del presente
+Trabajo Fin de Grado, existen tres diferencias relevantes que delimitan
+el espacio de aportación propio:
+
+\begin{itemize}
+  \item TAMIGO se concibe como apoyo a una \textbf{prueba oral}
+        presencial. Este TFG, en cambio, genera un examen
+        \textbf{escrito} en formato PDF, listo para imprimir y
+        administrar de forma simultánea a varios estudiantes sin
+        necesidad de entrevista individual.
+  \item TAMIGO requiere que el asistente docente \textbf{seleccione
+        manualmente} los bloques de código sobre los que generar
+        preguntas. Este TFG \textbf{procesa el repositorio completo de
+        forma automática}, extrayendo unidades de código relevantes
+        mediante análisis sintáctico (\emph{tree-sitter} o el módulo
+        \texttt{ast} de Python).
+  \item TAMIGO está pensado como herramienta para asistentes docentes
+        en clases avanzadas. Este TFG se concibe para que el
+        \textbf{propio docente} la utilice directamente, sin
+        intermediarios, en cualquier asignatura con entregas de código.
+\end{itemize}
+
+En un plano complementario, \textcite{oli2024codecomprehension} aborda
+el problema dual: evaluar automáticamente las explicaciones que el
+estudiante proporciona sobre un código, comparando para ello LLMs y
+modelos de similitud semántica. Este trabajo no afecta al diseño de la
+herramienta presentada, pero abre la puerta a futuras integraciones que
+permitan acompañar la generación de preguntas con un módulo de
+corrección automática de las respuestas.
+
+
+% -----------------------------------------------------------------------------
+\section{Trabajos en el contexto académico español}
+\label{sec:trabajos-espana}
+
+La búsqueda sistemática en repositorios institucionales de
+universidades españolas confirma que la generación automática de
+exámenes a partir de código fuente con LLMs es un terreno apenas
+explorado en el ámbito nacional. Se han identificado, no obstante, dos
+trabajos previos próximos en distintos ejes.
+
+\textcite{briongos2020cuestionarios} desarrolla, como Trabajo Fin de
+Grado en la Universidad de Valladolid, una aplicación web destinada a
+profesorado y alumnado para la gestión de cuestionarios. La aplicación
+permite al docente crear preguntas manualmente, organizarlas en
+cuestionarios y asignárselas a los estudiantes, que las responden a
+través de la propia plataforma. El trabajo aporta una referencia
+relevante en cuanto al diseño de aplicaciones web docentes, pero la
+generación de las preguntas continúa siendo en él una tarea íntegramente
+manual, sin participación de técnicas de inteligencia artificial.
+
+Más reciente, y en una línea técnicamente más próxima, es el Trabajo
+Fin de Grado de \textcite{garcia2025ragqa} en la Universidad
+Politécnica de Madrid. El autor diseña un sistema de generación
+automática de pares pregunta-respuesta en español mediante LLMs, con la
+finalidad de construir conjuntos de evaluación para sistemas de
+recuperación aumentada por generación (\emph{Retrieval-Augmented
+Generation}, RAG). Aunque el caso de uso es distinto al del presente
+TFG, comparte con éste el empleo de LLMs para producir material de
+evaluación y refuerza la idea de que la generación automatizada de
+preguntas con LLMs en español es un área de investigación activa en el
+ámbito universitario nacional.
+
+No se ha encontrado, sin embargo, un trabajo previo en el contexto
+español que aborde específicamente la generación automática de
+exámenes sobre código fuente entregado por estudiantes, lo que sitúa el
+presente TFG en un nicho propio dentro del panorama académico nacional.
+
+
+% -----------------------------------------------------------------------------
+\section{Frameworks multi-agente para orquestación de LLMs}
+\label{sec:frameworks-multiagente}
+
+La implementación del patrón \emph{generator-critic} adoptado en este
+TFG se apoya en uno de los frameworks de orquestación multi-agente que
+han ganado tracción en el ecosistema Python desde 2023. Los principales
+candidatos considerados han sido CrewAI, LangGraph, AutoGen
+(actualmente integrado en Microsoft Agent Framework) y Pydantic AI.
+
+% TODO: Aún no se han añadido referencias verificadas para esta sección.
+% Cuando se haga, citar la documentación oficial de cada framework y la
+% bibliografía técnica que justifique la elección de CrewAI.
+
+Tras evaluar curva de aprendizaje, soporte para múltiples proveedores
+de modelo y madurez de cada herramienta, se ha optado por CrewAI como
+plataforma de orquestación. Los detalles técnicos y la justificación
+completa de esta elección se desarrollan en el capítulo de
+metodología.
+
+
+% -----------------------------------------------------------------------------
+\section{Posicionamiento del Trabajo Fin de Grado}
+\label{sec:posicionamiento}
+
+A la luz de la literatura revisada en este capítulo, el presente
+Trabajo Fin de Grado se sitúa en la intersección de tres líneas
+previamente disjuntas:
+
+\begin{enumerate}
+  \item La \textbf{generación automática de preguntas a partir de
+        código} con LLMs, iniciada por \textcite{sarsa2022autogen} y
+        refinada por sistemas como ExGen~\parencite{ta2026exgen}, hasta
+        ahora orientada a la creación de ejercicios genéricos.
+  \item La \textbf{evaluación auténtica en la era de la IA generativa},
+        que \textcite{chung2026openai} formaliza en un modelo de
+        verificación dirigido al código entregado por el estudiante,
+        pero cuya aplicación práctica está limitada por la manualidad
+        del proceso.
+  \item La \textbf{generación de preguntas sobre código del estudiante
+        asistida por LLM}, abierta por \textcite{anishka2024tamigo}
+        para el contexto concreto de pruebas orales con apoyo de
+        asistentes docentes.
+\end{enumerate}
+
+La aportación específica de este TFG consiste en \textbf{unificar y
+automatizar estas tres líneas} en una única herramienta de extremo a
+extremo, orientada al docente, que toma como entrada el repositorio de
+código entregado por un estudiante, lo analiza estructuralmente y
+produce como salida un documento PDF con un examen personalizado,
+compuesto por preguntas de distintos tipos (test, abiertas,
+razonamiento sobre código, etcétera), revisadas internamente mediante
+un patrón multi-agente \emph{generator-critic} formalizado con
+CrewAI. La generación es completamente automática, no requiere
+intervención del docente más allá de proporcionar el repositorio, y
+escala de forma natural al número de estudiantes y proyectos.
+
+De este modo, el TFG responde a una necesidad real y actual del
+profesorado universitario en informática, articulada por el propio
+tutor del trabajo: disponer de un mecanismo eficiente para verificar
+la comprensión real que cada estudiante posee sobre el código que
+entrega, en un contexto en el que las herramientas de IA generativa
+hacen insuficientes los métodos tradicionales de evaluación.
