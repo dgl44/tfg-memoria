@@ -45,10 +45,8 @@ auténtica en la era de la IA generativa (sección~\ref{sec:integridad-academica
 así como los primeros trabajos que abordan específicamente la generación de
 preguntas sobre código entregado por estudiantes
 (sección~\ref{sec:viva-llm}). Por último, se examina el panorama en el
-contexto académico español (sección~\ref{sec:trabajos-espana}), se introduce
-brevemente el ecosistema de frameworks multi-agente
-(sección~\ref{sec:frameworks-multiagente}) y se establece la aportación
-concreta de este Trabajo Fin de Grado
+contexto académico español (sección~\ref{sec:trabajos-espana}) y se
+establece la aportación concreta de este Trabajo Fin de Grado
 (sección~\ref{sec:posicionamiento}).
 
 
@@ -135,16 +133,15 @@ problema dentro de un debate más amplio.
 \label{sec:integridad-academica}
 
 La popularización de modelos generativos como ChatGPT, GitHub Copilot o
-Claude ha alterado profundamente el escenario de evaluación en los
+Claude ha cambiado el escenario de evaluación en los
 estudios de informática. Estos modelos son capaces de producir código
 funcional, completo y bien estructurado a partir de descripciones en
 lenguaje natural, lo que permite a un estudiante entregar un proyecto
 satisfactorio sin haber participado de manera significativa en su
 diseño, implementación o comprensión. Las técnicas tradicionales de
-detección automática de plagio resultan poco eficaces frente a este
-fenómeno, dado que el código generado no proviene de otro estudiante
-ni de un repositorio conocido, sino que se sintetiza \emph{de novo} para
-cada consulta.
+detección automática de plagio resultan poco eficaces en esta situación, dado que el código generado no proviene de otro estudiante
+ni de un repositorio conocido, sino que se genera desde cero en
+cada petición.
 
 Frente a este reto, la literatura reciente propone reorientar la
 evaluación hacia formas \emph{auténticas} (\emph{authentic assessment})
@@ -171,8 +168,7 @@ viabilidad de este modelo de evaluación.
 La limitación práctica más evidente del enfoque de Chung es la carga de
 trabajo que supone para el docente: diseñar manualmente preguntas
 específicas para el proyecto de cada estudiante resulta inviable en
-asignaturas con matrículas elevadas. Es precisamente en esta limitación
-donde se sitúa la motivación del presente Trabajo Fin de Grado.
+asignaturas con matrículas elevadas. Esta limitación es justo lo que motiva este TFG.
 
 
 % -----------------------------------------------------------------------------
@@ -186,7 +182,7 @@ literatura. El más cercano al planteamiento de este TFG es el sistema
 TAMIGO presentado por \textcite{anishka2024tamigo}.
 
 TAMIGO está diseñado para asistir a los \emph{teaching assistants} en
-la realización de pruebas orales (\emph{viva voce}) sobre proyectos de
+la realización de pruebas orales sobre proyectos de
 programación entregados por estudiantes. El asistente docente selecciona
 un bloque concreto de código y TAMIGO genera, mediante un LLM,
 preguntas adaptadas a ese fragmento, así como retroalimentación sobre
@@ -204,38 +200,27 @@ el espacio de aportación propio:
   \item TAMIGO se concibe como apoyo a una \textbf{prueba oral}
         presencial. Este TFG, en cambio, genera un examen
         \textbf{escrito} en formato PDF, listo para imprimir y
-        administrar de forma simultánea a varios estudiantes sin
-        necesidad de entrevista individual.
+        administrar a los estudiantes.
   \item TAMIGO requiere que el asistente docente \textbf{seleccione
         manualmente} los bloques de código sobre los que generar
-        preguntas. Este TFG \textbf{procesa el repositorio completo de
-        forma automática}, extrayendo unidades de código relevantes
-        mediante análisis sintáctico (\emph{tree-sitter} o el módulo
-        \texttt{ast} de Python).
-  \item TAMIGO está pensado como herramienta para asistentes docentes
-        en clases avanzadas. Este TFG se concibe para que el
+        preguntas. Este TFG \textbf{procesa la carpeta de código
+        completa de forma automática}, extrayendo unidades de código
+        relevantes mediante análisis sintáctico (\emph{tree-sitter} o
+        el módulo \texttt{ast} de Python).
+  \item TAMIGO está pensado como herramienta para asistentes docentes.
+        Este TFG se concibe para que el
         \textbf{propio docente} la utilice directamente, sin
         intermediarios, en cualquier asignatura con entregas de código.
 \end{itemize}
-
-En un plano complementario, \textcite{oli2024codecomprehension} aborda
-el problema dual: evaluar automáticamente las explicaciones que el
-estudiante proporciona sobre un código, comparando para ello LLMs y
-modelos de similitud semántica. Este trabajo no afecta al diseño de la
-herramienta presentada, pero abre la puerta a futuras integraciones que
-permitan acompañar la generación de preguntas con un módulo de
-corrección automática de las respuestas.
-
 
 % -----------------------------------------------------------------------------
 \section{Trabajos en el contexto académico español}
 \label{sec:trabajos-espana}
 
-La búsqueda sistemática en repositorios institucionales de
-universidades españolas confirma que la generación automática de
-exámenes a partir de código fuente con LLMs es un terreno apenas
-explorado en el ámbito nacional. Se han identificado, no obstante, dos
-trabajos previos próximos en distintos ejes.
+Al buscar en los archivos digitales de las universidades españolas, he
+visto que la generación automática de exámenes a partir de código con
+LLMs es algo que apenas se ha trabajado aquí. Aun así, he encontrado
+dos trabajos previos cercanos desde distintos ángulos.
 
 \textcite{briongos2020cuestionarios} desarrolla, como Trabajo Fin de
 Grado en la Universidad de Valladolid, una aplicación web destinada a
@@ -253,11 +238,10 @@ Politécnica de Madrid. El autor diseña un sistema de generación
 automática de pares pregunta-respuesta en español mediante LLMs, con la
 finalidad de construir conjuntos de evaluación para sistemas de
 recuperación aumentada por generación (\emph{Retrieval-Augmented
-Generation}, RAG). Aunque el caso de uso es distinto al del presente
-TFG, comparte con éste el empleo de LLMs para producir material de
-evaluación y refuerza la idea de que la generación automatizada de
-preguntas con LLMs en español es un área de investigación activa en el
-ámbito universitario nacional.
+Generation}, RAG). Aunque su uso es distinto al de este TFG, también utiliza LLMs para
+crear material de evaluación y muestra que la generación automática de
+preguntas con LLMs en español es un campo activo en las universidades
+españolas.
 
 No se ha encontrado, sin embargo, un trabajo previo en el contexto
 español que aborde específicamente la generación automática de
@@ -266,33 +250,11 @@ presente TFG en un nicho propio dentro del panorama académico nacional.
 
 
 % -----------------------------------------------------------------------------
-\section{Frameworks multi-agente para orquestación de LLMs}
-\label{sec:frameworks-multiagente}
-
-La implementación del patrón \emph{generator-critic} adoptado en este
-TFG se apoya en uno de los frameworks de orquestación multi-agente que
-han ganado tracción en el ecosistema Python desde 2023. Los principales
-candidatos considerados han sido CrewAI, LangGraph, AutoGen
-(actualmente integrado en Microsoft Agent Framework) y Pydantic AI.
-
-% TODO: Aún no se han añadido referencias verificadas para esta sección.
-% Cuando se haga, citar la documentación oficial de cada framework y la
-% bibliografía técnica que justifique la elección de CrewAI.
-
-Tras evaluar curva de aprendizaje, soporte para múltiples proveedores
-de modelo y madurez de cada herramienta, se ha optado por CrewAI como
-plataforma de orquestación. Los detalles técnicos y la justificación
-completa de esta elección se desarrollan en el capítulo de
-metodología.
-
-
-% -----------------------------------------------------------------------------
 \section{Posicionamiento del Trabajo Fin de Grado}
 \label{sec:posicionamiento}
 
-A la luz de la literatura revisada en este capítulo, el presente
-Trabajo Fin de Grado se sitúa en la intersección de tres líneas
-previamente disjuntas:
+Tras revisar los trabajos anteriores, este TFG combina tres áreas que
+hasta ahora se habían tratado por separado:
 
 \begin{enumerate}
   \item La \textbf{generación automática de preguntas a partir de
@@ -312,19 +274,20 @@ previamente disjuntas:
 
 La aportación específica de este TFG consiste en \textbf{unificar y
 automatizar estas tres líneas} en una única herramienta de extremo a
-extremo, orientada al docente, que toma como entrada el repositorio de
-código entregado por un estudiante, lo analiza estructuralmente y
+extremo, orientada al docente, que toma como entrada la carpeta de
+código entregada por un estudiante, la analiza estructuralmente y
 produce como salida un documento PDF con un examen personalizado,
 compuesto por preguntas de distintos tipos (test, abiertas,
 razonamiento sobre código, etcétera), revisadas internamente mediante
 un patrón multi-agente \emph{generator-critic} formalizado con
 CrewAI. La generación es completamente automática, no requiere
-intervención del docente más allá de proporcionar el repositorio, y
-escala de forma natural al número de estudiantes y proyectos.
+intervención del docente más allá de proporcionar la carpeta de
+código, y reduce el esfuerzo manual al no tener que diseñar preguntas
+para cada estudiante.
 
 De este modo, el TFG responde a una necesidad real y actual del
-profesorado universitario en informática, articulada por el propio
-tutor del trabajo: disponer de un mecanismo eficiente para verificar
-la comprensión real que cada estudiante posee sobre el código que
-entrega, en un contexto en el que las herramientas de IA generativa
-hacen insuficientes los métodos tradicionales de evaluación.
+profesorado universitario en informática: disponer de un mecanismo
+eficiente para verificar la comprensión real que cada estudiante posee
+sobre el código que entrega, en un contexto en el que las herramientas
+de IA generativa hacen insuficientes los métodos tradicionales de
+evaluación.
