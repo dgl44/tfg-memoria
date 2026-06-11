@@ -1,18 +1,6 @@
 \chapter{Estado del arte}
 \label{cap:estado-arte}
 
-% =============================================================================
-% BORRADOR (versión inicial, 2026-06-02) — REESCRIBIR A TU ESTILO.
-%
-% Este texto es un primer borrador para que veas la dirección y el hilo
-% argumental. NO lo dejes tal cual: reescríbelo con tus propias palabras,
-% reorganiza párrafos, añade matices personales. El objetivo es que la
-% memoria suene a TI, no a un LLM.
-%
-% Las citas ya están colocadas donde corresponden. Si reordenas párrafos,
-% asegúrate de que cada cita siga siendo coherente con el texto que la
-% rodea.
-% =============================================================================
 
 
 % -----------------------------------------------------------------------------
@@ -34,9 +22,9 @@ esfuerzo manual elevado por parte del profesorado~\parencite{raihan2025llmcse}.
 Sin embargo, la misma intrusión de la inteligencia artificial generativa
 que habilita estas herramientas plantea un problema docente nuevo: si los
 estudiantes pueden utilizar estos modelos para resolver sus prácticas, ¿cómo
-nos aseguramos de que realmente han comprendido lo que entregan?
+puede garantizarse que realmente han comprendido lo que entregan?
 
-En este capítulo voy a repasar el estado del arte siguiendo estos dos ejes.
+En este capítulo se repasa el estado del arte siguiendo estos dos ejes.
 Primero se analiza la evolución de la generación automática de preguntas
 con LLMs, con especial atención a su aplicación a código fuente
 (secciones~\ref{sec:aqg-llms} y~\ref{sec:aqg-codigo}). A continuación se
@@ -205,8 +193,7 @@ el espacio de aportación propio:
         manualmente} los bloques de código sobre los que generar
         preguntas. Este TFG \textbf{procesa la carpeta de código
         completa de forma automática}, extrayendo unidades de código
-        relevantes mediante análisis sintáctico (\emph{tree-sitter} o
-        el módulo \texttt{ast} de Python).
+        relevantes mediante análisis sintáctico con \emph{tree-sitter}.
   \item TAMIGO está pensado como herramienta para asistentes docentes.
         Este TFG se concibe para que el
         \textbf{propio docente} la utilice directamente, sin
@@ -217,10 +204,10 @@ el espacio de aportación propio:
 \section{Trabajos en el contexto académico español}
 \label{sec:trabajos-espana}
 
-Al buscar en los archivos digitales de las universidades españolas, he
-visto que la generación automática de exámenes a partir de código con
-LLMs es algo que apenas se ha trabajado aquí. Aun así, he encontrado
-dos trabajos previos cercanos desde distintos ángulos.
+La búsqueda en los archivos digitales de las universidades españolas
+revela que la generación automática de exámenes a partir de código con
+LLMs es un ámbito apenas explorado en este contexto. Aun así, se han
+identificado dos trabajos previos cercanos desde distintos ángulos.
 
 \textcite{briongos2020cuestionarios} desarrolla, como Trabajo Fin de
 Grado en la Universidad de Valladolid, una aplicación web destinada a
