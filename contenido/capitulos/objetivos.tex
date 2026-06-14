@@ -1,6 +1,61 @@
 \chapter{Objetivos}
 \label{cap:objetivos}
 
-\noindent\textit{[Pendiente de redactar.]}
+El auge de las herramientas de inteligencia artificial generativa
+en el ámbito académico plantea un reto creciente para el profesorado
+universitario: un estudiante puede entregar código funcional y correcto
+sin haber participado de forma significativa en su desarrollo ni comprenderlo
+realmente. Como se expone en el capítulo anterior, los métodos de evaluación
+tradicionales resultan insuficientes para detectar esta situación en
+asignaturas con un número elevado de alumnos.
+Este trabajo aborda ese problema mediante el diseño y la implementación de
+una herramienta que automatiza la generación de exámenes escritos y
+personalizados sobre el código entregado por cada estudiante.
 
-% TODO: Redactar los objetivos del trabajo (general y específicos).
+
+\section{Objetivo general}
+\label{sec:objetivo-general}
+
+El objetivo general de este Trabajo Fin de Grado es diseñar, implementar y
+evaluar una herramienta que, a partir de la carpeta de código fuente
+entregada por un estudiante, genere automáticamente un examen escrito
+personalizado ---compuesto por preguntas de distintos tipos y revisadas
+mediante un sistema multi-agente--- que permita al docente verificar la
+comprensión real del estudiante sobre el código que ha entregado.
+
+
+\section{Objetivos específicos}
+\label{sec:objetivos-especificos}
+
+Para alcanzar el objetivo general, se establecen los siguientes objetivos
+específicos:
+
+\begin{enumerate}
+
+  \item Implementar un módulo de análisis sintáctico de código fuente
+        basado en \emph{tree-sitter} que extraiga automáticamente las
+        unidades de código relevantes ---funciones, métodos y clases--- de
+        una carpeta completa, descartando aquellas demasiado triviales para
+        fundamentar una pregunta de evaluación significativa, y con una
+        arquitectura extensible a múltiples lenguajes de programación.
+
+  \item Diseñar e implementar un sistema de generación de preguntas
+        multi-agente, siguiendo el patrón \emph{generator-critic}, que
+        produzca preguntas de distintos tipos (opción múltiple, preguntas
+        abiertas y trazas de ejecución) adaptadas al código concreto
+        analizado y al nivel académico de la asignatura.
+
+  \item Comparar la calidad de las preguntas generadas con y sin el agente
+        revisor, para medir en qué medida la revisión automática mejora
+        los resultados respecto a una generación directa sin postprocesado.
+
+  \item Desarrollar una interfaz web que permita al docente proporcionar
+        la carpeta de código del estudiante, configurar los parámetros del
+        examen (asignatura, número de preguntas, tipos de pregunta) y
+        obtener el resultado en formato PDF listo para su administración.
+
+  \item Evaluar el sistema mediante pruebas sobre fragmentos de código
+        representativos, analizando la corrección técnica de las preguntas
+        generadas y su adecuación al contexto académico configurado.
+
+\end{enumerate}
