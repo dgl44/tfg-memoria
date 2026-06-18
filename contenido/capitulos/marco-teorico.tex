@@ -237,6 +237,33 @@ presente TFG en un nicho propio dentro del panorama académico nacional.
 
 
 % -----------------------------------------------------------------------------
+\section{Sistemas multi-agente y el patrón \emph{generator-critic}}
+\label{sec:multiagente}
+
+El sistema de generación de preguntas propuesto en este trabajo se apoya
+en una arquitectura multi-agente, un enfoque que ha ganado relevancia con
+la madurez de los modelos de lenguaje. Frente al uso de un único modelo
+que resuelve una tarea de principio a fin, los sistemas multi-agente
+coordinan varios agentes con funciones diferenciadas que colaboran para
+abordar problemas complejos~\parencite{guo2024multiagents}. Esta idea se
+ha materializado en \emph{frameworks} como AutoGen~\parencite{wu2023autogen}
+o CrewAI, que facilitan la definición de agentes especializados y la
+orquestación de su interacción.
+
+Dentro de este enfoque destaca el patrón de reflexión (\emph{reflection}), 
+también conocido como \emph{generator-critic}. La referencia principal es
+Self-Refine~\parencite{madaan2023selfrefine}, en el que un modelo genera
+una respuesta inicial, produce una crítica sobre ella y la refina de
+forma iterativa, sin necesidad de reentrenamiento. Este esquema mejora la
+calidad del resultado respecto a una generación directa y es
+conceptualmente equivalente a la cadena de filtrado de
+ExGen~\parencite{ta2026exgen} descrita anteriormente. El presente Trabajo
+Fin de Grado adopta este patrón de forma explícita, mediante un agente
+generador y un agente revisor, según se detallará en los capítulos de
+diseño e implementación.
+
+
+% -----------------------------------------------------------------------------
 \section{Posicionamiento del Trabajo Fin de Grado}
 \label{sec:posicionamiento}
 
