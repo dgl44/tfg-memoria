@@ -1,6 +1,176 @@
 \chapter{Metodología}
 \label{cap:metodologia}
 
-\noindent\textit{[Pendiente de redactar.]}
+Este capítulo describe la metodología seguida para el desarrollo del
+Trabajo Fin de Grado. El trabajo tiene dos caras. Por un lado, es un
+proyecto de desarrollo software, en el que se construye una herramienta
+a partir de unos requisitos; por otro, incluye una parte experimental
+orientada a comprobar si el sistema resuelve el problema planteado. Esta
+dualidad condiciona el enfoque metodológico, que se detalla
+en la sección~\ref{sec:enfoque-metodologico}, y se concreta en las fases
+del proyecto (sección~\ref{sec:fases-proyecto}), la metodología de
+desarrollo (sección~\ref{sec:metodologia-desarrollo}), las herramientas
+empleadas (sección~\ref{sec:herramientas-tecnologias}) y la metodología
+de evaluación (sección~\ref{sec:metodologia-evaluacion}).
 
-% TODO: Redactar la metodología seguida para el desarrollo del trabajo.
+
+\section{Enfoque metodológico}
+\label{sec:enfoque-metodologico}
+
+El desarrollo de la herramienta se ha abordado siguiendo un modelo
+iterativo e incremental. En lugar de planificar el sistema completo de
+antemano y construirlo en una única fase, se ha optado por levantar un
+prototipo mínimo funcional y ampliarlo de forma progresiva, validando su
+funcionamiento de extremo a extremo en cada iteración antes de añadir
+nueva complejidad. Este enfoque resulta especialmente adecuado ante la incertidumbre
+técnica que supone el uso de modelos de lenguaje de gran tamaño, cuyo
+comportamiento no puede preverse por completo sin experimentación.
+
+Al carácter de desarrollo software se suma un componente experimental.
+Una vez construido el sistema, no basta con comprobar que funciona desde
+un punto de vista técnico: es necesario valorar si las preguntas que
+genera son realmente útiles para un docente y si las decisiones de
+diseño adoptadas están justificadas. Por este motivo, la metodología
+contempla además una fase de evaluación con la que contrastar
+empíricamente la aportación de los distintos componentes del sistema.
+
+
+\section{Fases del proyecto}
+\label{sec:fases-proyecto}
+
+El trabajo se ha organizado en cuatro fases principales que, si bien se
+describen de forma secuencial, se han solapado parcialmente en el
+tiempo, en coherencia con el carácter iterativo del desarrollo:
+
+\begin{enumerate}
+  \item \textbf{Revisión bibliográfica.} Estudio del estado del arte en
+        generación automática de preguntas con modelos de lenguaje, en
+        evaluación auténtica frente a la aparición de la inteligencia
+        artificial generativa y en los antecedentes más próximos al
+        problema abordado. Esta fase, recogida en el
+        capítulo~\ref{cap:estado-arte}, ha permitido delimitar la
+        aportación del trabajo.
+  \item \textbf{Diseño de la arquitectura.} Definición de los
+        componentes del sistema y de sus interfaces: el módulo de
+        análisis de código, el sistema multi-agente de generación y
+        revisión, y la configuración académica que adapta las preguntas.
+  \item \textbf{Implementación iterativa.} Construcción incremental de
+        los componentes, partiendo de un prototipo capaz de generar una
+        pregunta sencilla y ampliándolo de forma progresiva con nuevas
+        capacidades, validando cada incremento de extremo a extremo.
+  \item \textbf{Evaluación.} Diseño y ejecución de las pruebas
+        destinadas a valorar la calidad de las preguntas generadas y la
+        aportación del agente revisor, según la metodología descrita en
+        la sección~\ref{sec:metodologia-evaluacion}.
+\end{enumerate}
+
+
+\section{Metodología de desarrollo}
+\label{sec:metodologia-desarrollo}
+
+La implementación se ha guiado por el principio de mantener en todo
+momento una versión del sistema ejecutable y verificable. Cada
+incremento ha consistido en una funcionalidad concreta y acotada ---por
+ejemplo, la extracción de unidades de código, el filtrado de las
+triviales o la incorporación de un nuevo tipo de pregunta--- que se ha
+integrado y verificado de extremo a extremo antes de continuar. Esta forma de trabajar permite
+detectar errores de forma temprana y reduce el riesgo asociado a la
+integración de componentes que dependen de un modelo de lenguaje
+externo.
+
+El control de versiones se ha gestionado con Git. El proyecto se ha
+estructurado en dos repositorios independientes: uno para el código de
+la herramienta y otro para la presente memoria. Esta separación facilita
+el seguimiento de la evolución de cada parte de forma autónoma y
+mantiene un historial de cambios claro y diferenciado.
+
+
+\section{Herramientas y tecnologías}
+\label{sec:herramientas-tecnologias}
+
+El desarrollo se ha llevado a cabo en el lenguaje Python, por su amplio
+ecosistema en el ámbito del procesamiento del lenguaje natural y por la
+disponibilidad de las bibliotecas necesarias para el proyecto. El
+análisis sintáctico del código fuente se apoya en \emph{tree-sitter},
+una biblioteca de análisis incremental que ofrece gramáticas para
+múltiples lenguajes de programación y que dota al sistema de capacidad
+de extensión a lenguajes distintos del empleado en la validación
+inicial.
+
+La orquestación del sistema multi-agente se ha realizado con el
+\emph{framework} CrewAI, que permite definir agentes con funciones
+diferenciadas y coordinar su interacción. El modelo de lenguaje se
+consume a través de Amazon Bedrock, empleando Claude durante el
+desarrollo en su variante más ligera por motivos de coste y rapidez, y
+reservando un modelo de mayor capacidad para la validación final. La
+redacción de la memoria se ha realizado en \LaTeX. La
+tabla~\ref{tab:herramientas} resume las principales herramientas
+empleadas y su finalidad.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Principales herramientas y tecnologías empleadas.}
+  \label{tab:herramientas}
+  \begin{tabular}{ll}
+    \toprule
+    Herramienta & Finalidad \\
+    \midrule
+    Python        & Lenguaje de desarrollo de la herramienta \\
+    tree-sitter   & Análisis sintáctico del código fuente \\
+    CrewAI        & Orquestación del sistema multi-agente \\
+    Amazon Bedrock & Acceso a los modelos de lenguaje \\
+    Git           & Control de versiones \\
+    \LaTeX        & Redacción de la memoria \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+
+\section{Metodología de evaluación}
+\label{sec:metodologia-evaluacion}
+
+La evaluación del sistema se plantea en torno a una validación central,
+alineada con el objetivo del trabajo, y un estudio de apoyo que justifica
+una de sus decisiones de diseño. La validación central
+(sección~\ref{sec:validacion-utilidad}) busca determinar si la
+herramienta cumple su propósito: generar preguntas útiles para el
+docente. El estudio de apoyo (sección~\ref{sec:ablacion}) es un estudio
+de ablación que mide la aportación concreta del agente revisor.
+
+\subsection{Validación de utilidad y configurabilidad}
+\label{sec:validacion-utilidad}
+
+La validación central consiste en valorar si las preguntas generadas
+serían realmente utilizables por un docente en un examen, lo que
+constituye la medida última del valor de la herramienta frente al
+problema que la motiva. Para ello se analiza el resultado que produce el
+sistema sobre distintos repositorios de código, examinando la
+corrección técnica de las preguntas, su relevancia respecto al código
+del que parten y su adecuación al nivel académico indicado.
+
+Esta valoración se apoya en el criterio del tutor del trabajo, docente
+en activo, cuya revisión de una muestra de las preguntas generadas
+aporta un juicio de utilidad fundamentado desde la experiencia real en
+el aula. Asimismo, se ilustra de forma cualitativa la
+configurabilidad del sistema, mostrando cómo la variación de parámetros
+como el nivel académico, el tipo de pregunta o el contexto de la
+asignatura repercute en las preguntas producidas.
+
+\subsection{Estudio de ablación del agente revisor}
+\label{sec:ablacion}
+
+Como estudio complementario se plantea una ablación que justifica la
+decisión de incorporar un agente revisor al sistema. El experimento
+compara el sistema completo con una variante en la que se desactiva
+dicho agente, dejando únicamente la generación directa de preguntas, con
+el fin de determinar en qué medida la revisión automática mejora la
+calidad del resultado respecto a una generación sin postprocesado. Con
+este fin, se generan preguntas sobre un mismo conjunto de código en
+ambas configuraciones y se comparan los resultados. La comparación se
+realiza con una rúbrica que valora aspectos como la corrección técnica,
+la claridad del enunciado y la adecuación al nivel. Para aligerar la
+evaluación manual, se contempla emplear además un modelo de lenguaje
+externo como juez automático. Conviene aclarar que este juez es
+independiente del agente revisor: el revisor forma parte del proceso de
+generación de preguntas, mientras que el juez interviene solo en la fase
+de evaluación, como evaluador imparcial de los resultados.
