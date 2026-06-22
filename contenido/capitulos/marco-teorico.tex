@@ -32,8 +32,10 @@ revisa la literatura reciente sobre integridad académica y evaluación
 auténtica en la era de la IA generativa (sección~\ref{sec:integridad-academica}),
 así como los primeros trabajos que abordan específicamente la generación de
 preguntas sobre código entregado por estudiantes
-(sección~\ref{sec:viva-llm}). Por último, se examina el panorama en el
+(sección~\ref{sec:viva-llm}). A continuación se examina el panorama en el
 contexto académico español (sección~\ref{sec:trabajos-espana}) y se
+presentan los fundamentos de los sistemas multi-agente sobre los que se
+apoya la herramienta (sección~\ref{sec:multiagente}). Por último, se
 establece la aportación concreta de este Trabajo Fin de Grado
 (sección~\ref{sec:posicionamiento}).
 
@@ -241,26 +243,44 @@ presente TFG en un nicho propio dentro del panorama académico nacional.
 \label{sec:multiagente}
 
 El sistema de generación de preguntas propuesto en este trabajo se apoya
-en una arquitectura multi-agente, un enfoque que ha ganado relevancia con
-la madurez de los modelos de lenguaje. Frente al uso de un único modelo
-que resuelve una tarea de principio a fin, los sistemas multi-agente
-coordinan varios agentes con funciones diferenciadas que colaboran para
-abordar problemas complejos~\parencite{guo2024multiagents}. Esta idea se
-ha materializado en \emph{frameworks} como AutoGen~\parencite{wu2023autogen}
-o CrewAI, que facilitan la definición de agentes especializados y la
-orquestación de su interacción.
+en una arquitectura multi-agente. En el contexto de los modelos de
+lenguaje, se denomina \emph{agente} a un componente autónomo construido
+sobre un modelo de lenguaje al que se asigna un rol y un objetivo
+concretos, y que elabora su salida razonando en lenguaje natural a partir
+de las instrucciones recibidas. Un sistema multi-agente coordina varios
+de estos agentes, con funciones diferenciadas, que colaboran para
+resolver una tarea que resultaría más difícil de abordar con un único
+modelo de propósito general~\parencite{guo2024multiagents}. Este enfoque
+se ha materializado en \emph{frameworks} como
+AutoGen~\parencite{wu2023autogen} o CrewAI, que facilitan la definición de
+agentes especializados y la orquestación de su interacción.
 
-Dentro de este enfoque destaca el patrón de reflexión (\emph{reflection}), 
-también conocido como \emph{generator-critic}. La referencia principal es
-Self-Refine~\parencite{madaan2023selfrefine}, en el que un modelo genera
-una respuesta inicial, produce una crítica sobre ella y la refina de
-forma iterativa, sin necesidad de reentrenamiento. Este esquema mejora la
-calidad del resultado respecto a una generación directa y es
-conceptualmente equivalente a la cadena de filtrado de
-ExGen~\parencite{ta2026exgen} descrita anteriormente. El presente Trabajo
-Fin de Grado adopta este patrón de forma explícita, mediante un agente
-generador y un agente revisor, según se detallará en los capítulos de
-diseño e implementación.
+Dentro de este enfoque destaca el patrón de reflexión (\emph{reflection}),
+también conocido como \emph{generator-critic}. Su funcionamiento se basa
+en un ciclo de dos roles: un agente generador produce una primera versión
+de la salida y un agente crítico la evalúa, señalando errores o aspectos
+mejorables; la crítica resultante permite regenerar o corregir la salida,
+repitiendo el ciclo hasta alcanzar una calidad suficiente. La referencia
+principal de este esquema es Self-Refine~\parencite{madaan2023selfrefine},
+en el que un mismo modelo asume de forma sucesiva los papeles de
+generación, crítica y refinamiento, sin necesidad de reentrenamiento, y
+mejora así la calidad respecto a una generación directa. La diferencia en
+una arquitectura multi-agente es que esos papeles se reparten entre
+agentes distintos, lo que permite especializar a cada uno en su función.
+Este patrón es, además, conceptualmente equivalente a la cadena de
+filtrado de ExGen~\parencite{ta2026exgen} descrita anteriormente.
+
+Para implementar esta arquitectura se ha optado por
+CrewAI~\parencite{crewai}, un \emph{framework} de orquestación
+multi-agente de código abierto que permite definir cada agente mediante
+un rol, un objetivo y un contexto, y encadenar sus tareas de forma
+estructurada. Frente a alternativas como AutoGen, CrewAI ofrece una
+abstracción de alto nivel ---basada en agentes y tareas--- que se ajusta
+de forma directa al patrón \emph{generator-critic} empleado y reduce el
+código necesario para coordinar la interacción entre el generador y el
+revisor. El presente Trabajo Fin de Grado adopta este patrón de forma
+explícita, mediante un agente generador y un agente revisor, cuyo diseño
+concreto se detalla en el capítulo correspondiente.
 
 
 % -----------------------------------------------------------------------------
