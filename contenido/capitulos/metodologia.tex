@@ -2,10 +2,11 @@
 \label{cap:metodologia}
 
 Este capítulo describe la metodología seguida para el desarrollo del
-Trabajo Fin de Grado. El trabajo tiene dos caras. Por un lado, es un
-proyecto de desarrollo software, en el que se construye una herramienta
-a partir de unos requisitos; por otro, incluye una parte experimental
-orientada a comprobar si el sistema resuelve el problema planteado. Esta
+Trabajo Fin de Grado. El trabajo tiene una doble vertiente. Por un lado,
+es un proyecto de desarrollo software, en el que se construye una
+herramienta a partir de unos requisitos; por otro, incluye una parte
+experimental orientada a comprobar si el sistema resuelve el problema
+planteado. Esta
 dualidad condiciona el enfoque metodológico, que se detalla
 en la sección~\ref{sec:enfoque-metodologico}, y se concreta en las fases
 del proyecto (sección~\ref{sec:fases-proyecto}), la metodología de
@@ -18,8 +19,8 @@ de evaluación (sección~\ref{sec:metodologia-evaluacion}).
 \label{sec:enfoque-metodologico}
 
 El desarrollo de la herramienta se ha abordado siguiendo un modelo
-iterativo e incremental. En lugar de planificar el sistema completo de
-antemano y construirlo en una única fase, se ha optado por levantar un
+iterativo e incremental~\parencite{larman2003iid}. En lugar de planificar el sistema completo de
+antemano y construirlo en una única fase, se ha optado por construir un
 prototipo mínimo funcional y ampliarlo de forma progresiva, validando su
 funcionamiento de extremo a extremo en cada iteración antes de añadir
 nueva complejidad. Este enfoque resulta especialmente adecuado ante la incertidumbre
@@ -64,6 +65,34 @@ tiempo, en coherencia con el carácter iterativo del desarrollo:
         la sección~\ref{sec:metodologia-evaluacion}.
 \end{enumerate}
 
+La tabla~\ref{tab:cronograma} muestra la distribución temporal de estas
+fases a lo largo del proyecto. Tras la propuesta inicial del trabajo, una
+primera etapa estuvo dedicada a la documentación y a la formación en las
+tecnologías empleadas, mientras que el grueso del desarrollo y la
+redacción se concentró en los meses finales.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Cronograma del proyecto (agosto 2025 -- julio 2026).}
+  \label{tab:cronograma}
+  \footnotesize
+  \setlength{\tabcolsep}{4pt}
+  \newcommand{\gx}{\rule[-0.2ex]{0.9em}{1.3ex}}
+  \begin{tabular}{l *{12}{c}}
+    \toprule
+    Fase & Ago & Sep & Oct & Nov & Dic & Ene & Feb & Mar & Abr & May & Jun & Jul \\
+    \midrule
+    Propuesta y definición       & \gx &     &     &     &     &     &     &     &     &     &     &     \\
+    Documentación y formación    &     & \gx & \gx & \gx & \gx & \gx & \gx & \gx &     &     &     &     \\
+    Revisión bibliográfica       &     &     &     &     &     &     &     &     & \gx & \gx & \gx &     \\
+    Implementación               &     &     &     &     &     &     &     &     & \gx & \gx & \gx &     \\
+    Redacción de la memoria      &     &     &     &     &     &     &     &     &     & \gx & \gx & \gx \\
+    Evaluación                   &     &     &     &     &     &     &     &     &     &     & \gx & \gx \\
+    Defensa                      &     &     &     &     &     &     &     &     &     &     &     & \gx \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
 
 \section{Metodología de desarrollo}
 \label{sec:metodologia-desarrollo}
@@ -73,16 +102,35 @@ momento una versión del sistema ejecutable y verificable. Cada
 incremento ha consistido en una funcionalidad concreta y acotada ---por
 ejemplo, la extracción de unidades de código, el filtrado de las
 triviales o la incorporación de un nuevo tipo de pregunta--- que se ha
-integrado y verificado de extremo a extremo antes de continuar. Esta forma de trabajar permite
-detectar errores de forma temprana y reduce el riesgo asociado a la
-integración de componentes que dependen de un modelo de lenguaje
-externo.
+integrado y verificado de extremo a extremo antes de continuar. Esta
+forma de trabajar permite detectar errores de forma temprana y reduce el
+riesgo asociado a la integración de componentes que dependen de un
+modelo de lenguaje externo.
 
-El control de versiones se ha gestionado con Git. El proyecto se ha
-estructurado en dos repositorios independientes: uno para el código de
-la herramienta y otro para la presente memoria. Esta separación facilita
-el seguimiento de la evolución de cada parte de forma autónoma y
-mantiene un historial de cambios claro y diferenciado.
+En cuanto a la estrategia de pruebas, la validación se ha realizado
+principalmente de forma funcional y de extremo a extremo: cada
+incremento se ha ejecutado sobre fragmentos de código de ejemplo y se ha
+comprobado que la salida producida era correcta antes de darlo por
+terminado. Este enfoque resulta especialmente apropiado para un sistema
+cuyo comportamiento depende de un modelo de lenguaje, donde buena parte
+de la validación consiste en inspeccionar la calidad de las salidas
+generadas, difícilmente comprobable mediante aserciones automáticas. El
+detalle de las pruebas realizadas se recoge en el capítulo dedicado al
+desarrollo.
+
+El control de versiones se ha gestionado con Git, trabajando
+directamente sobre la rama principal e integrando los cambios mediante
+confirmaciones (\emph{commits}) frecuentes, de granularidad variable
+según el alcance de cada cambio. Este flujo, próximo al desarrollo
+basado en tronco (\emph{trunk-based development}), resulta adecuado para
+un proyecto desarrollado por una sola persona, al evitar la sobrecarga
+de gestionar ramas paralelas. El proyecto se ha estructurado en dos
+repositorios independientes: uno para el código de la herramienta y otro
+para la memoria, este último partiendo de la plantilla oficial en
+\LaTeX{} de la Escuela Politécnica Superior de la Universidad de
+Alicante. Esta separación facilita el seguimiento de la evolución de
+cada parte de forma autónoma y mantiene un historial de cambios claro y
+diferenciado.
 
 
 \section{Herramientas y tecnologías}
@@ -91,7 +139,7 @@ mantiene un historial de cambios claro y diferenciado.
 El desarrollo se ha llevado a cabo en el lenguaje Python, por su amplio
 ecosistema en el ámbito del procesamiento del lenguaje natural y por la
 disponibilidad de las bibliotecas necesarias para el proyecto. El
-análisis sintáctico del código fuente se apoya en \emph{tree-sitter},
+análisis sintáctico del código fuente se ha apoyado en \emph{tree-sitter},
 una biblioteca de análisis incremental que ofrece gramáticas para
 múltiples lenguajes de programación y que dota al sistema de capacidad
 de extensión a lenguajes distintos del empleado en la validación
@@ -99,10 +147,10 @@ inicial.
 
 La orquestación del sistema multi-agente se ha realizado con el
 \emph{framework} CrewAI, que permite definir agentes con funciones
-diferenciadas y coordinar su interacción. El modelo de lenguaje se
-consume a través de Amazon Bedrock, empleando Claude durante el
-desarrollo en su variante más ligera por motivos de coste y rapidez, y
-reservando un modelo de mayor capacidad para la validación final. La
+diferenciadas y coordinar su interacción. El acceso al modelo de
+lenguaje se ha realizado a través de Amazon Bedrock, empleando Claude
+Haiku 4.5 durante el desarrollo por motivos de coste y rapidez, y
+reservando Claude Sonnet 4.6, más capaz, para la validación final. La
 redacción de la memoria se ha realizado en \LaTeX. La
 tabla~\ref{tab:herramientas} resume las principales herramientas
 empleadas y su finalidad.
@@ -170,7 +218,7 @@ ambas configuraciones y se comparan los resultados. La comparación se
 realiza con una rúbrica que valora aspectos como la corrección técnica,
 la claridad del enunciado y la adecuación al nivel. Para aligerar la
 evaluación manual, se contempla emplear además un modelo de lenguaje
-externo como juez automático. Conviene aclarar que este juez es
+externo como juez automático~\parencite{zheng2023llmjudge}. Conviene aclarar que este juez es
 independiente del agente revisor: el revisor forma parte del proceso de
 generación de preguntas, mientras que el juez interviene solo en la fase
 de evaluación, como evaluador imparcial de los resultados.
