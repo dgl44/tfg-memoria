@@ -1,6 +1,483 @@
 \chapter{Desarrollo}
 \label{cap:desarrollo}
 
-\noindent\textit{[Pendiente de redactar.]}
+Este capítulo describe el diseño y la construcción de la herramienta. A
+diferencia del capítulo anterior, centrado en la metodología y en las
+tecnologías empleadas, aquí se aborda el \emph{qué} se ha construido: los
+requisitos que debe satisfacer el sistema (sección~\ref{sec:analisis-requisitos}),
+la arquitectura y los componentes que dan respuesta a esos requisitos
+(sección~\ref{sec:diseno}), los detalles más relevantes de su
+implementación (sección~\ref{sec:implementacion}) y las pruebas
+realizadas para verificar su funcionamiento (sección~\ref{sec:pruebas}).
 
-% TODO: Redactar el capítulo de desarrollo (diseño e implementación).
+
+\section{Análisis de requisitos}
+\label{sec:analisis-requisitos}
+
+Antes de abordar el diseño se delimitan las funciones que el sistema debe
+ofrecer y las cualidades que debe satisfacer. El análisis parte del
+problema que motiva el trabajo: un docente recibe un conjunto de
+proyectos de programación y necesita evaluar, de forma individualizada y
+a una escala razonable, si cada estudiante comprende el código que ha
+entregado. De este planteamiento se deriva un único actor relevante, el
+\textbf{docente}, que aporta el código de partida, configura las
+características del examen y decide, sobre el resultado producido, qué
+preguntas incorpora finalmente a la prueba.
+
+\subsection{Requisitos funcionales}
+\label{sec:requisitos-funcionales}
+
+Los requisitos funcionales describen las capacidades que el sistema debe
+proporcionar:
+
+\begin{itemize}
+  \item \textbf{RF1.} El sistema debe aceptar como entrada el código
+        fuente de un proyecto, tanto un archivo individual como una
+        carpeta completa que se recorra de forma recursiva.
+  \item \textbf{RF2.} El sistema debe extraer de ese código las unidades
+        susceptibles de ser evaluadas ---funciones y clases---,
+        conservando la información necesaria para formular preguntas
+        sobre ellas.
+  \item \textbf{RF3.} El sistema debe descartar de forma automática las
+        unidades triviales, demasiado simples para fundamentar una
+        pregunta de valor, evitando así un gasto innecesario de recursos.
+  \item \textbf{RF4.} El sistema debe generar preguntas de distintos
+        tipos ---de opción múltiple, de traza de ejecución y de respuesta
+        abierta---, de modo que el examen pueda combinar diferentes
+        formas de evaluar la comprensión.
+  \item \textbf{RF5.} El sistema debe revisar automáticamente cada
+        pregunta generada mediante un segundo agente que valore su
+        calidad y emita un veredicto.
+  \item \textbf{RF6.} El sistema debe permitir al docente configurar el
+        contexto académico ---asignatura, curso, titulación, nivel de
+        dificultad y tipos de pregunta deseados---, de manera que las
+        preguntas se adapten a sus necesidades.
+  \item \textbf{RF7.} El sistema debe permitir activar o desactivar el
+        agente revisor, tanto para ofrecer una generación más rápida
+        cuando se prefiera como para hacer posible el estudio comparativo
+        de su aportación.
+  \item \textbf{RF8.} El sistema debe devolver, por cada pregunta, un
+        resultado estructurado que separe el enunciado generado del
+        veredicto y los comentarios del revisor, de forma que el docente
+        pueda revisar, editar o descartar cada pregunta de manera
+        individual antes de incluirla en el examen.
+  \item \textbf{RF9.} El sistema debe ofrecer una interfaz web que
+        permita al docente realizar el flujo completo sin necesidad de
+        conocimientos técnicos: aportar el código del proyecto,
+        configurar el contexto académico, consultar las preguntas
+        generadas junto a la valoración del revisor y seleccionar las que
+        desea conservar.
+  \item \textbf{RF10.} El sistema debe producir, a partir de las
+        preguntas seleccionadas por el docente, un examen en formato PDF
+        listo para imprimir o distribuir.
+\end{itemize}
+
+\subsection{Requisitos no funcionales}
+\label{sec:requisitos-no-funcionales}
+
+Los requisitos no funcionales recogen las cualidades que el sistema debe
+satisfacer con independencia de las funciones concretas anteriores:
+
+\begin{itemize}
+  \item \textbf{RNF1 (Extensibilidad a nuevos lenguajes).} El análisis
+        del código debe estar organizado de modo que la incorporación de
+        un nuevo lenguaje de programación no obligue a alterar el resto
+        del sistema.
+  \item \textbf{RNF2 (Independencia del modelo y del \emph{framework}).}
+        El acoplamiento con el modelo de lenguaje y con la tecnología de
+        orquestación debe quedar acotado, de manera que sustituir el
+        modelo o el \emph{framework} afecte al menor número de
+        componentes posible.
+  \item \textbf{RNF3 (Configurabilidad).} El comportamiento del sistema
+        debe poder ajustarse mediante parámetros, sin necesidad de
+        modificar el código, para adaptarse a distintos escenarios
+        docentes.
+  \item \textbf{RNF4 (Calidad de las preguntas).} Las preguntas
+        producidas deben ser técnicamente correctas, relevantes respecto
+        al código del que parten y adecuadas al nivel indicado,
+        cualidad que motiva la incorporación del agente revisor.
+  \item \textbf{RNF5 (Mantenibilidad).} La organización del código debe
+        favorecer su comprensión y evolución, separando responsabilidades
+        en componentes con interfaces bien definidas.
+\end{itemize}
+
+
+\section{Diseño del sistema}
+\label{sec:diseno}
+
+El sistema se ha estructurado en una serie de componentes organizados por
+capas, cada uno con una responsabilidad única y bien delimitada. Esta
+organización responde directamente a los requisitos no funcionales de
+mantenibilidad (RNF5) e independencia tecnológica (RNF2): al separar el
+análisis del código, la generación y revisión de preguntas, la
+configuración académica y la representación de los resultados, cada parte
+puede comprenderse y modificarse de forma aislada. La presente sección describe
+primero la arquitectura general (sección~\ref{sec:arquitectura-general}) y
+detalla a continuación cada uno de los componentes principales.
+
+\subsection{Arquitectura general}
+\label{sec:arquitectura-general}
+
+El núcleo de la herramienta se organiza como una sucesión de etapas de
+procesamiento. La figura~\ref{fig:flujo-sistema} resume el recorrido que
+sigue la información desde el código de entrada, en la parte superior,
+hasta el examen en PDF, en la parte inferior: el código se analiza para
+extraer sus unidades, estas se filtran para descartar las triviales y cada
+unidad restante da lugar a una pregunta que se genera y, opcionalmente, se
+revisa, hasta obtener el resultado estructurado que se plasma finalmente
+en el examen.
+
+\begin{figure}[htbp]
+  \centering
+  \begin{tikzpicture}[
+      node distance=8mm,
+      caja/.style={
+        draw, rounded corners, align=center, text width=6.4cm,
+        minimum height=8mm, font=\small, fill=black!3,
+      },
+      lateral/.style={
+        draw, dashed, rounded corners, align=center, text width=3.2cm,
+        minimum height=8mm, font=\footnotesize, fill=black!3,
+      },
+      flecha/.style={->, thick},
+    ]
+    \node[caja] (entrada) {Código fuente del proyecto (archivo o carpeta)};
+    \node[caja, below=of entrada] (analisis) {Análisis de código: extracción de unidades (funciones y clases)};
+    \node[caja, below=of analisis] (filtrado) {Filtrado de unidades triviales};
+    \node[caja, below=of filtrado] (generacion) {Generación de la pregunta (agente generador)};
+    \node[caja, below=of generacion] (revision) {Revisión de la pregunta (agente revisor, opcional)};
+    \node[caja, below=of revision] (resultado) {Resultado estructurado: enunciado + veredicto + comentario};
+    \node[caja, below=of resultado] (pdf) {Examen en formato PDF};
+
+    \node[lateral, right=8mm of generacion] (contexto) {Contexto académico};
+
+    \draw[flecha] (entrada) -- (analisis);
+    \draw[flecha] (analisis) -- (filtrado);
+    \draw[flecha] (filtrado) -- (generacion);
+    \draw[flecha] (generacion) -- (revision);
+    \draw[flecha] (revision) -- (resultado);
+    \draw[flecha] (resultado) -- (pdf);
+    \draw[flecha, dashed] (contexto) -- (generacion);
+    \draw[flecha, dashed] (contexto.south) |- (revision.east);
+  \end{tikzpicture}
+  \caption[Flujo de procesamiento del sistema.]{Flujo de procesamiento
+  del sistema, desde el código fuente de entrada hasta el examen en PDF.
+  El contexto académico configurado por el docente condiciona las fases
+  de generación y revisión.}
+  \label{fig:flujo-sistema}
+\end{figure}
+
+Internamente, estas etapas se reparten entre módulos organizados en capas
+cuyas dependencias fluyen en un único sentido, sin ciclos: cada módulo
+conoce únicamente a aquellos de los que depende. El análisis del código
+constituye la capa base y no depende de ningún otro módulo; sobre él se
+apoyan los modelos de datos del dominio; por encima se sitúan la
+construcción de las instrucciones para los agentes y la orquestación de
+estos; y, por último, un módulo coordina el flujo completo. Todo el
+acoplamiento con el \emph{framework} de agentes y con el modelo de
+lenguaje queda confinado en el módulo de orquestación de los agentes, en
+respuesta al requisito RNF2. La estructura de módulos resultante se
+muestra a continuación.
+
+\begin{dirtreebox}
+  \dirtreeitem[0]{src/generador/}
+  \dirtreeitem[1]{parser.py --- análisis de código}
+  \dirtreeitem[1]{modelos.py --- tipos de datos del dominio}
+  \dirtreeitem[1]{prompts.py --- instrucciones para los agentes}
+  \dirtreeitem[1]{agentes.py --- orquestación: CrewAI y modelo de lenguaje}
+  \dirtreeitem[1]{pipeline.py --- coordinación del flujo completo}
+  \dirtreeitem[1]{\_\_init\_\_.py --- interfaz pública del paquete}
+\end{dirtreebox}
+
+\subsection{Módulo de análisis de código}
+\label{sec:diseno-parser}
+
+La primera responsabilidad del sistema es transformar el código fuente en
+un conjunto de unidades evaluables (RF2). Para ello se realiza un análisis
+sintáctico que identifica las funciones y clases de nivel
+superior de cada archivo y las representa mediante una estructura de datos
+uniforme, independiente del lenguaje de programación de origen. Dicha
+estructura conserva, para cada unidad, su nombre, su código completo, su
+documentación asociada y una serie de métricas que permiten valorar su
+complejidad.
+
+El módulo se ha diseñado en torno a un registro de analizadores por
+extensión de archivo, de manera que el resto del sistema invoca siempre
+una misma interfaz, ajena al lenguaje concreto que se esté procesando.
+Incorporar soporte para un nuevo lenguaje se reduce así a registrar un
+nuevo analizador, sin necesidad de modificar las capas superiores, lo que
+da respuesta directa al requisito de extensibilidad (RNF1).
+
+Sobre las unidades extraídas se aplica un filtrado que descarta las
+triviales (RF3): aquellas que, por su escasa complejidad ---medida en
+función del número de estructuras de control y de su extensión---, no
+permiten formular preguntas que evalúen una comprensión real del código.
+Este descarte evita destinar llamadas al modelo de lenguaje a fragmentos
+de los que no cabe esperar una pregunta de valor.
+
+\subsection{Sistema multi-agente de generación y revisión}
+\label{sec:diseno-agentes}
+
+El componente central del sistema es el responsable de transformar cada
+unidad de código en una pregunta de examen. Su diseño adopta el patrón
+generador-revisor descrito en el capítulo~\ref{cap:estado-arte}: un primer
+agente formula la pregunta y un segundo la somete a una revisión crítica,
+emitiendo un veredicto sobre su calidad (RF4 y RF5).
+
+El \textbf{agente generador} recibe una unidad de código y produce una
+pregunta del tipo solicitado ---de opción múltiple, de traza de ejecución
+o de respuesta abierta---. La formulación de la pregunta varía según el
+tipo, por lo que las instrucciones que recibe el agente se construyen de
+forma específica para cada uno de ellos. El \textbf{agente revisor} recibe
+la pregunta generada y la evalúa atendiendo a su claridad, su corrección
+técnica y su adecuación al nivel académico indicado, concluyendo con un
+veredicto que puede ser de aprobación, aprobación con sugerencias o
+rechazo. Este veredicto es el que materializa el control de calidad
+exigido por el requisito RNF4.
+
+Es en este componente, como ya se ha señalado, donde se concentra todo el
+acoplamiento con el \emph{framework} de orquestación y con el modelo de
+lenguaje (RNF2). El resto del sistema interactúa con él únicamente a través
+de los modelos de datos del dominio, de modo que un eventual cambio de
+modelo o de \emph{framework} quedaría circunscrito a este módulo.
+
+\subsection{Configuración académica}
+\label{sec:diseno-contexto}
+
+Para que las preguntas se adapten a las necesidades de cada docente, el
+sistema reúne en una única estructura los parámetros de configuración
+(RF6): la asignatura, el curso, la titulación, el nivel de dificultad y los
+tipos de pregunta que se desean generar. Esta información se traslada a las
+instrucciones de los agentes, condicionando tanto la generación como la
+revisión, tal y como refleja la figura~\ref{fig:flujo-sistema}.
+
+La misma estructura incorpora un parámetro que permite activar o desactivar
+el agente revisor (RF7). Cuando se desactiva, el sistema produce las
+preguntas únicamente con el agente generador, sin revisión posterior. Este
+mecanismo cumple una doble función: ofrece una modalidad de generación más
+rápida y, sobre todo, habilita el estudio de ablación descrito en la
+sección~\ref{sec:ablacion}, al permitir comparar el sistema completo con
+una variante sin revisor sin más que modificar un parámetro. Al residir
+toda la configuración en parámetros explícitos, el comportamiento del
+sistema puede ajustarse sin alterar el código, en respuesta al requisito
+de configurabilidad (RNF3).
+
+\subsection{Representación del resultado}
+\label{sec:diseno-resultado}
+
+El resultado de procesar cada unidad no se reduce a un texto plano, sino
+que se modela como una estructura que separa de forma explícita sus
+componentes: la unidad de código de partida, el tipo de pregunta, el
+enunciado generado, el veredicto del revisor y sus comentarios (RF8). Esta
+decisión de diseño es la que hace posible que la capa de presentación
+muestre por separado la pregunta y la crítica, y que el docente pueda
+revisar, editar o descartar cada pregunta de manera individual antes de
+incorporarla al examen.
+
+De forma coherente con esta separación, se tomó la decisión de no
+incrustar el código de la unidad dentro del enunciado generado: es la capa
+de presentación ---la interfaz web o el documento PDF--- la encargada de
+adjuntarlo junto a la pregunta. Esta elección mantiene los enunciados
+centrados en lo que deben evaluar y evita duplicar el código en la salida
+del modelo.
+
+
+\section{Implementación}
+\label{sec:implementacion}
+
+Esta sección detalla los aspectos más relevantes de la implementación de
+los componentes descritos en el diseño. No se pretende reproducir el
+código de forma exhaustiva, sino destacar las decisiones que mejor
+ilustran cómo se materializan los requisitos planteados. El sistema se ha
+implementado en Python, organizado en los módulos presentados en la
+sección~\ref{sec:arquitectura-general}.
+
+\subsection{Análisis y filtrado del código}
+\label{sec:impl-parser}
+
+El análisis del código se ha implementado sobre \emph{tree-sitter}, que
+construye el árbol sintáctico de cada archivo. A partir de ese árbol se
+recorren los nodos de nivel superior y se identifican las definiciones de
+funciones y clases ---incluidas las precedidas de decoradores---, que se
+encapsulan en la estructura \texttt{UnidadCodigo}. Esta estructura reúne,
+para cada unidad, su tipo, su nombre, su código fuente, su documentación y
+dos datos derivados de su posición en el archivo y de su árbol sintáctico:
+el número de líneas y el número de estructuras de control que contiene.
+
+Para satisfacer el requisito de extensibilidad (RNF1), la asociación entre
+extensiones de archivo y analizadores se resuelve mediante un registro
+explícito. El resto del sistema invoca siempre la función
+\texttt{extraer\_unidades}, que selecciona el analizador adecuado según la
+extensión del archivo. Añadir soporte para un nuevo lenguaje se reduce, por
+tanto, a implementar su analizador y registrarlo, sin modificar ninguna
+otra parte del sistema.
+
+\begin{pythoncode}[title={parser.py --- registro de analizadores por lenguaje}]
+BackendFn = Callable[[Path], list[UnidadCodigo]]
+
+_BACKENDS: dict[str, BackendFn] = {
+    ".py": _extraer_python,
+    # ".java": _extraer_java,   # añadir un lenguaje = registrar su backend
+}
+
+def extraer_unidades(ruta: str | Path) -> list[UnidadCodigo]:
+    backend = _BACKENDS.get(Path(ruta).suffix)
+    if backend is None:
+        raise ValueError(f"Extensión no soportada: {Path(ruta).suffix}")
+    return backend(ruta)
+\end{pythoncode}
+
+Sobre las unidades extraídas se aplica el filtrado de las triviales (RF3).
+El criterio combina dos medidas de complejidad: una unidad se considera
+trivial cuando no contiene ninguna estructura de control y, además, su
+extensión es inferior a cinco líneas. De este modo se descartan funciones
+elementales ---por ejemplo, las que se limitan a devolver un valor--- pero
+se conservan aquellas que, pese a ser breves, incluyen bifurcaciones o
+bucles susceptibles de fundamentar una pregunta.
+
+\subsection{Generación y revisión de preguntas}
+\label{sec:impl-agentes}
+
+Por cada unidad de código que supera el filtrado se construye un equipo de
+agentes que la transforma en una pregunta. El primer paso es elaborar las
+instrucciones que recibirán los agentes, que dependen del tipo de pregunta
+solicitado (RF4). Para evitar una larga cadena de condicionales, la
+selección del constructor de instrucciones se resuelve mediante una tabla
+de despacho indexada por tipo de pregunta, de modo que incorporar un nuevo
+tipo se limita a añadir su constructor a dicha tabla.
+
+A partir de esas instrucciones se construye el equipo. El \textbf{agente
+generador} recibe la unidad de código y formula la pregunta; cuando la
+revisión está activada, se añade un \textbf{agente revisor} que recibe la
+pregunta generada y emite su veredicto. Ambos agentes se ejecutan de forma
+secuencial, de manera que la salida del generador se pasa como contexto al
+revisor, materializando el patrón generador-revisor. El carácter opcional
+del revisor (RF7) se traduce directamente en la construcción condicional
+del equipo. El fragmento siguiente resume este ensamblaje ---se omite por
+brevedad la creación de los agentes y de sus tareas---:
+
+\begin{pythoncode}[title={agentes.py --- equipo generador-revisor}]
+agentes = [agente_generador]
+tareas = [tarea_generar]
+# El revisor es opcional (RF7); su ausencia define la variante de ablación.
+if contexto.usar_revisor:
+    agentes.append(agente_revisor)
+    tareas.append(tarea_revisar)   # toma como contexto la pregunta generada
+return Crew(agents=agentes, tasks=tareas, process=Process.sequential)
+\end{pythoncode}
+
+\subsection{Deducción del veredicto}
+\label{sec:impl-veredicto}
+
+El agente revisor expresa su valoración en texto libre, del que es
+necesario deducir un veredicto estructurado ---aprobada, aprobada con
+sugerencias o rechazada--- que el sistema pueda tratar de forma uniforme
+(RF8). Esta conversión se resuelve mediante una heurística que prioriza la
+porción de texto situada tras la última aparición del marcador
+«VEREDICTO», que es donde el revisor declara su decisión. Si en esa
+ventana no se obtiene una conclusión clara, se recurre a un análisis del
+texto completo.
+
+\begin{pythoncode}[title={agentes.py --- deducción del veredicto del revisor}]
+def extraer_veredicto(texto_revisor: str) -> Veredicto:
+    texto = texto_revisor.upper()
+    pos = texto.rfind("VEREDICTO")
+    if pos != -1:
+        resultado = _clasificar_veredicto(texto[pos:pos + 80])
+        if resultado is not Veredicto.DESCONOCIDO:
+            return resultado
+    return _clasificar_veredicto(texto)
+\end{pythoncode}
+
+La clasificación de cada fragmento atiende al orden en que se buscan las
+palabras clave: la condición de rechazo se comprueba antes que la de
+aprobación, ya que un texto que rechaza una pregunta suele mencionar
+también el término «aprobada» en construcciones como «no puede ser
+aprobada». Cuando la revisión está desactivada, no existe
+veredicto que deducir y el resultado se marca como no revisado, lo que
+permite distinguir esta situación de un veredicto real en el estudio de
+ablación.
+
+\subsection{Coordinación del flujo}
+\label{sec:impl-pipeline}
+
+La capa de coordinación enlaza los componentes anteriores para procesar
+tanto un archivo individual como un repositorio completo (RF1). Al procesar
+un archivo, se extraen sus unidades, se descartan las triviales y, por cada
+unidad restante, se construye y ejecuta el equipo de agentes, recogiendo el
+resultado en una estructura uniforme. Cuando el docente solicita varios
+tipos de pregunta, estos se reparten entre las unidades de forma rotatoria,
+de manera que el examen resultante combine distintas formas de evaluación
+sin concentrar un único tipo.
+
+El procesamiento de un repositorio recorre la carpeta de forma recursiva y
+selecciona únicamente los archivos cuya extensión cuenta con un analizador
+registrado, omitiendo además los directorios que no contienen código del
+estudiante ---como los entornos virtuales, las cachés o las carpetas de
+dependencias---. El resultado de todo el proceso es una lista de elementos
+estructurados, cada uno con su pregunta, su veredicto y el comentario del
+revisor (RF8), que constituye la entrada de la capa de presentación
+encargada de mostrarlos al docente y de generar el examen final.
+
+
+\section{Pruebas}
+\label{sec:pruebas}
+
+La verificación del sistema se ha abordado en dos niveles complementarios.
+El primero comprueba de forma automática que los componentes deterministas
+se comportan según lo esperado; el segundo valida el funcionamiento del
+sistema completo de extremo a extremo, incluida la parte que depende del
+modelo de lenguaje. Conviene distinguir esta verificación ---orientada a
+confirmar que el sistema funciona correctamente--- de la evaluación de la
+calidad de las preguntas generadas, que constituye un estudio experimental
+y se aborda en el capítulo~\ref{cap:resultados}.
+
+\subsection{Pruebas unitarias}
+\label{sec:pruebas-unitarias}
+
+Los componentes cuyo comportamiento es determinista ---aquellos que no
+dependen del modelo de lenguaje--- se han cubierto con una batería de
+pruebas unitarias automatizadas. Estas pruebas se concentran en el análisis
+del código, el filtrado de unidades triviales y la deducción del veredicto
+a partir del texto del revisor: son las piezas en las que un error podría
+pasar inadvertido y cuyo resultado puede contrastarse con un valor
+esperado. La tabla~\ref{tab:pruebas-unitarias} resume su cobertura.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Cobertura de las pruebas unitarias por componente.}
+  \label{tab:pruebas-unitarias}
+  \begin{tabular}{lc}
+    \toprule
+    Componente & N.\textsuperscript{o} de pruebas \\
+    \midrule
+    Análisis de código (extracción de unidades)      & 6 \\
+    Filtrado de unidades triviales                    & 4 \\
+    Deducción del veredicto del revisor               & 6 \\
+    \midrule
+    Total                                             & 16 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+Entre los casos contemplados figura, por ejemplo, la comprobación de que la
+deducción del veredicto resuelve correctamente situaciones ambiguas, como
+un comentario que rechaza la pregunta pero menciona el término «aprobada»
+en una negación. El conjunto completo se ejecuta en pocos segundos, lo que
+permite verificar con rapidez que ningún cambio introduce una regresión en
+el comportamiento esperado.
+
+\subsection{Verificación funcional}
+\label{sec:pruebas-funcional}
+
+El sistema completo se ha validado de forma funcional, ejecutándolo de
+extremo a extremo sobre archivos de código de ejemplo y examinando la
+salida producida. Dado que la generación de preguntas depende de un modelo
+de lenguaje cuyo resultado no es determinista, esta verificación no puede
+automatizarse mediante aserciones sobre el contenido exacto de las
+preguntas. En su lugar, se ha comprobado que el sistema completa el flujo
+sin errores y que produce, para cada unidad relevante, una pregunta del
+tipo solicitado acompañada de su veredicto y del comentario del revisor,
+con la estructura esperada. La valoración de si esas preguntas son, además,
+útiles y de calidad ---esto es, su evaluación pedagógica--- se aborda en el
+capítulo~\ref{cap:resultados}.
