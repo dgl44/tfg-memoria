@@ -35,7 +35,7 @@ proporcionar:
         fuente de un proyecto, tanto un archivo individual como una
         carpeta completa que se recorra de forma recursiva.
   \item \textbf{RF2.} El sistema debe extraer de ese código las unidades
-        susceptibles de ser evaluadas ---funciones y clases---,
+        que se pueden evaluar ---funciones y clases---,
         conservando la información necesaria para formular preguntas
         sobre ellas.
   \item \textbf{RF3.} El sistema debe descartar de forma automática las
@@ -68,8 +68,10 @@ proporcionar:
         generadas junto a la valoración del revisor y seleccionar las que
         desea conservar.
   \item \textbf{RF10.} El sistema debe producir, a partir de las
-        preguntas seleccionadas por el docente, un examen en formato PDF
-        listo para imprimir o distribuir.
+        preguntas seleccionadas por el docente, el examen en dos formatos:
+        PDF, listo para imprimir o distribuir, y Word, editable, para que
+        el docente pueda adaptar el examen a su gusto a partir de la base
+        generada.
 \end{itemize}
 
 \subsection{Requisitos no funcionales}
@@ -106,7 +108,7 @@ satisfacer con independencia de las funciones concretas anteriores:
 \label{sec:diseno}
 
 El sistema se ha estructurado en una serie de componentes organizados por
-capas, cada uno con una responsabilidad única y bien delimitada. Esta
+capas, cada uno con una única responsabilidad. Esta
 organización responde directamente a los requisitos no funcionales de
 mantenibilidad (RNF5) e independencia tecnológica (RNF2): al separar el
 análisis del código, la generación y revisión de preguntas, la
@@ -121,11 +123,11 @@ detalla a continuación cada uno de los componentes principales.
 El núcleo de la herramienta se organiza como una sucesión de etapas de
 procesamiento. La figura~\ref{fig:flujo-sistema} resume el recorrido que
 sigue la información desde el código de entrada, en la parte superior,
-hasta el examen en PDF, en la parte inferior: el código se analiza para
+hasta el examen final, en la parte inferior: el código se analiza para
 extraer sus unidades, estas se filtran para descartar las triviales y cada
 unidad restante da lugar a una pregunta que se genera y, opcionalmente, se
-revisa, hasta obtener el resultado estructurado que se plasma finalmente
-en el examen.
+revisa, hasta obtener el resultado estructurado que da lugar finalmente
+al examen.
 
 \begin{figure}[htbp]
   \centering
@@ -147,7 +149,7 @@ en el examen.
     \node[caja, below=of filtrado] (generacion) {Generación de la pregunta (agente generador)};
     \node[caja, below=of generacion] (revision) {Revisión de la pregunta (agente revisor, opcional)};
     \node[caja, below=of revision] (resultado) {Resultado estructurado: enunciado + veredicto + comentario};
-    \node[caja, below=of resultado] (pdf) {Examen en formato PDF};
+    \node[caja, below=of resultado] (pdf) {Examen final (PDF y Word)};
 
     \node[lateral, right=8mm of generacion] (contexto) {Contexto académico};
 
@@ -161,9 +163,9 @@ en el examen.
     \draw[flecha, dashed] (contexto.south) |- (revision.east);
   \end{tikzpicture}
   \caption[Flujo de procesamiento del sistema.]{Flujo de procesamiento
-  del sistema, desde el código fuente de entrada hasta el examen en PDF.
-  El contexto académico configurado por el docente condiciona las fases
-  de generación y revisión.}
+  del sistema, desde el código fuente de entrada hasta el examen final
+  (PDF y Word). El contexto académico configurado por el docente condiciona
+  las fases de generación y revisión.}
   \label{fig:flujo-sistema}
 \end{figure}
 
@@ -175,8 +177,8 @@ apoyan los modelos de datos del dominio; por encima se sitúan la
 construcción de las instrucciones para los agentes y la orquestación de
 estos; y, por último, un módulo coordina el flujo completo. Todo el
 acoplamiento con el \emph{framework} de agentes y con el modelo de
-lenguaje queda confinado en el módulo de orquestación de los agentes, en
-respuesta al requisito RNF2. La estructura de módulos resultante se
+lenguaje queda limitado al módulo de orquestación de los agentes, para
+cumplir el requisito RNF2. La estructura de módulos resultante se
 muestra a continuación.
 
 \begin{dirtreebox}
@@ -198,15 +200,14 @@ sintáctico que identifica las funciones y clases de nivel
 superior de cada archivo y las representa mediante una estructura de datos
 uniforme, independiente del lenguaje de programación de origen. Dicha
 estructura conserva, para cada unidad, su nombre, su código completo, su
-documentación asociada y una serie de métricas que permiten valorar su
-complejidad.
+documentación asociada y unos datos para medir su complejidad.
 
 El módulo se ha diseñado en torno a un registro de analizadores por
 extensión de archivo, de manera que el resto del sistema invoca siempre
 una misma interfaz, ajena al lenguaje concreto que se esté procesando.
 Incorporar soporte para un nuevo lenguaje se reduce así a registrar un
 nuevo analizador, sin necesidad de modificar las capas superiores, lo que
-da respuesta directa al requisito de extensibilidad (RNF1).
+cumple directamente el requisito de extensibilidad (RNF1).
 
 Sobre las unidades extraídas se aplica un filtrado que descarta las
 triviales (RF3): aquellas que, por su escasa complejidad ---medida en
@@ -232,14 +233,14 @@ forma específica para cada uno de ellos. El \textbf{agente revisor} recibe
 la pregunta generada y la evalúa atendiendo a su claridad, su corrección
 técnica y su adecuación al nivel académico indicado, concluyendo con un
 veredicto que puede ser de aprobación, aprobación con sugerencias o
-rechazo. Este veredicto es el que materializa el control de calidad
-exigido por el requisito RNF4.
+rechazo. Este veredicto es el que aplica el control de calidad
+que pide el requisito RNF4.
 
 Es en este componente, como ya se ha señalado, donde se concentra todo el
 acoplamiento con el \emph{framework} de orquestación y con el modelo de
 lenguaje (RNF2). El resto del sistema interactúa con él únicamente a través
-de los modelos de datos del dominio, de modo que un eventual cambio de
-modelo o de \emph{framework} quedaría circunscrito a este módulo.
+de los modelos de datos del dominio, de modo que un posible cambio de
+modelo o de \emph{framework} quedaría limitado a este módulo.
 
 \subsection{Configuración académica}
 \label{sec:diseno-contexto}
@@ -257,9 +258,9 @@ preguntas únicamente con el agente generador, sin revisión posterior. Este
 mecanismo cumple una doble función: ofrece una modalidad de generación más
 rápida y, sobre todo, habilita el estudio de ablación descrito en la
 sección~\ref{sec:ablacion}, al permitir comparar el sistema completo con
-una variante sin revisor sin más que modificar un parámetro. Al residir
-toda la configuración en parámetros explícitos, el comportamiento del
-sistema puede ajustarse sin alterar el código, en respuesta al requisito
+una variante sin revisor sin más que modificar un parámetro. Como toda
+la configuración está en parámetros, el comportamiento del
+sistema puede ajustarse sin tocar el código, cumpliendo el requisito
 de configurabilidad (RNF3).
 
 \subsection{Representación del resultado}
@@ -276,8 +277,8 @@ incorporarla al examen.
 
 De forma coherente con esta separación, se tomó la decisión de no
 incrustar el código de la unidad dentro del enunciado generado: es la capa
-de presentación ---la interfaz web o el documento PDF--- la encargada de
-adjuntarlo junto a la pregunta. Esta elección mantiene los enunciados
+de presentación ---la interfaz web o los documentos exportados (PDF y
+Word)--- la encargada de adjuntarlo junto a la pregunta. Esta elección mantiene los enunciados
 centrados en lo que deben evaluar y evita duplicar el código en la salida
 del modelo.
 
@@ -286,9 +287,9 @@ del modelo.
 \label{sec:implementacion}
 
 Esta sección detalla los aspectos más relevantes de la implementación de
-los componentes descritos en el diseño. No se pretende reproducir el
-código de forma exhaustiva, sino destacar las decisiones que mejor
-ilustran cómo se materializan los requisitos planteados. El sistema se ha
+los componentes descritos en el diseño. No se reproduce todo el
+código, sino que se destacan las decisiones que mejor
+muestran cómo se cumplen los requisitos. El sistema se ha
 implementado en Python, organizado en los módulos presentados en la
 sección~\ref{sec:arquitectura-general}.
 
@@ -298,7 +299,8 @@ sección~\ref{sec:arquitectura-general}.
 El análisis del código se ha implementado sobre \emph{tree-sitter}, que
 construye el árbol sintáctico de cada archivo. A partir de ese árbol se
 recorren los nodos de nivel superior y se identifican las definiciones de
-funciones y clases ---incluidas las precedidas de decoradores---, que se
+funciones y clases ---incluidas las que llevan decoradores
+(\texttt{@staticmethod}, \texttt{@dataclass}, etc.)---, que se
 encapsulan en la estructura \texttt{UnidadCodigo}. Esta estructura reúne,
 para cada unidad, su tipo, su nombre, su código fuente, su documentación y
 dos datos derivados de su posición en el archivo y de su árbol sintáctico:
@@ -349,11 +351,13 @@ tipo se limita a añadir su constructor a dicha tabla.
 A partir de esas instrucciones se construye el equipo. El \textbf{agente
 generador} recibe la unidad de código y formula la pregunta; cuando la
 revisión está activada, se añade un \textbf{agente revisor} que recibe la
-pregunta generada y emite su veredicto. Ambos agentes se ejecutan de forma
+pregunta generada y emite su veredicto. El revisor recibe también el
+código de la unidad, que necesita para comprobar que la respuesta propuesta
+es correcta respecto a él. Ambos agentes se ejecutan de forma
 secuencial, de manera que la salida del generador se pasa como contexto al
-revisor, materializando el patrón generador-revisor. El carácter opcional
-del revisor (RF7) se traduce directamente en la construcción condicional
-del equipo. El fragmento siguiente resume este ensamblaje ---se omite por
+revisor, lo que implementa el patrón generador-revisor. Que el revisor sea
+opcional (RF7) se refleja en que el equipo se construye condicionalmente.
+El fragmento siguiente resume este ensamblaje ---se omite por
 brevedad la creación de los agentes y de sus tareas---:
 
 \begin{pythoncode}[title={agentes.py --- equipo generador-revisor}]
@@ -419,6 +423,42 @@ estructurados, cada uno con su pregunta, su veredicto y el comentario del
 revisor (RF8), que constituye la entrada de la capa de presentación
 encargada de mostrarlos al docente y de generar el examen final.
 
+\subsection{Interfaz web}
+\label{sec:impl-web}
+
+La interacción con el docente se ofrece a través de una interfaz web
+construida con Streamlit, que cubre todo el flujo sin exigir conocimientos
+técnicos (RF9). El docente configura el contexto académico, aporta el
+código del proyecto y lanza la generación. Una vez generadas, las preguntas
+se presentan junto al veredicto del revisor y sus comentarios, de manera que
+el docente puede leer cada una, consultar la crítica y marcar cuáles desea
+conservar; por defecto se preseleccionan las aprobadas, pero la decisión
+final es suya. Esta distinción entre lo que el sistema propone y lo que el
+docente aprueba se apoya en el resultado estructurado descrito en la
+sección~\ref{sec:diseno-resultado}, que permite mostrar por separado el
+enunciado y la crítica. La interfaz es un prototipo funcional, orientado a
+cubrir el flujo completo más que al acabado visual.
+
+\subsection{Generación del examen}
+\label{sec:impl-salida}
+
+A partir de las preguntas seleccionadas, el sistema produce el examen en
+dos formatos (RF10): PDF, mediante la biblioteca \emph{fpdf2}, pensado para
+imprimir o distribuir directamente; y Word, mediante \emph{python-docx},
+editable, para que el docente adapte el examen a partir de la base generada.
+Ambos formatos comparten el mismo contenido: por cada pregunta, el enunciado
+y el código de la unidad correspondiente.
+
+Dos decisiones de esta capa merecen mención. La primera es que el documento
+destinado al alumno contiene solo el enunciado: la solución que el modelo
+genera junto a la pregunta ---respuesta correcta y justificación--- se
+recorta de forma automática, ya que el docente la consulta en la interfaz
+pero no debe aparecer en el examen. La segunda es que, como el código de la
+unidad se adjunta a cada pregunta, el sistema evita duplicarlo: si el
+enunciado ya lo reproduce ---algo que el modelo hace en ocasiones pese a las
+instrucciones en contra---, se omite el bloque de código adjunto, detectando
+la coincidencia a partir de la cabecera de la función o la clase.
+
 
 \section{Pruebas}
 \label{sec:pruebas}
@@ -460,12 +500,12 @@ esperado. La tabla~\ref{tab:pruebas-unitarias} resume su cobertura.
   \end{tabular}
 \end{table}
 
-Entre los casos contemplados figura, por ejemplo, la comprobación de que la
+Entre los casos probados está, por ejemplo, la comprobación de que la
 deducción del veredicto resuelve correctamente situaciones ambiguas, como
 un comentario que rechaza la pregunta pero menciona el término «aprobada»
 en una negación. El conjunto completo se ejecuta en pocos segundos, lo que
-permite verificar con rapidez que ningún cambio introduce una regresión en
-el comportamiento esperado.
+permite comprobar rápido que ningún cambio rompe el comportamiento
+esperado.
 
 \subsection{Verificación funcional}
 \label{sec:pruebas-funcional}
