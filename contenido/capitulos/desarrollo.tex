@@ -7,8 +7,10 @@ tecnologías empleadas, aquí se aborda el \emph{qué} se ha construido: los
 requisitos que debe satisfacer el sistema (sección~\ref{sec:analisis-requisitos}),
 la arquitectura y los componentes que dan respuesta a esos requisitos
 (sección~\ref{sec:diseno}), los detalles más relevantes de su
-implementación (sección~\ref{sec:implementacion}) y las pruebas
-realizadas para verificar su funcionamiento (sección~\ref{sec:pruebas}).
+implementación (sección~\ref{sec:implementacion}), las pruebas
+realizadas para verificar su funcionamiento (sección~\ref{sec:pruebas}) y el
+diseño del estudio de ablación con el que se evalúa la aportación del agente
+revisor (sección~\ref{sec:diseno-ablacion}).
 
 
 \section{Análisis de requisitos}
@@ -35,7 +37,7 @@ proporcionar:
         fuente de un proyecto, tanto un archivo individual como una
         carpeta completa que se recorra de forma recursiva.
   \item \textbf{RF2.} El sistema debe extraer de ese código las unidades
-        que se pueden evaluar ---funciones y clases---,
+        que se pueden evaluar ---funciones, clases y métodos---,
         conservando la información necesaria para formular preguntas
         sobre ellas.
   \item \textbf{RF3.} El sistema debe descartar de forma automática las
@@ -144,7 +146,7 @@ al examen.
       flecha/.style={->, thick},
     ]
     \node[caja] (entrada) {Código fuente del proyecto (archivo o carpeta)};
-    \node[caja, below=of entrada] (analisis) {Análisis de código: extracción de unidades (funciones y clases)};
+    \node[caja, below=of entrada] (analisis) {Análisis de código: extracción de unidades (funciones, clases y métodos)};
     \node[caja, below=of analisis] (filtrado) {Filtrado de unidades triviales};
     \node[caja, below=of filtrado] (generacion) {Generación de la pregunta (agente generador)};
     \node[caja, below=of generacion] (revision) {Revisión de la pregunta (agente revisor, opcional)};
@@ -196,8 +198,8 @@ muestra a continuación.
 
 La primera responsabilidad del sistema es transformar el código fuente en
 un conjunto de unidades evaluables (RF2). Para ello se realiza un análisis
-sintáctico que identifica las funciones y clases de nivel
-superior de cada archivo y las representa mediante una estructura de datos
+sintáctico que identifica las funciones, las clases y sus métodos
+de cada archivo y los representa mediante una estructura de datos
 uniforme, independiente del lenguaje de programación de origen. Dicha
 estructura conserva, para cada unidad, su nombre, su código completo, su
 documentación asociada y unos datos para medir su complejidad.
@@ -256,8 +258,8 @@ La misma estructura incorpora un parámetro que permite activar o desactivar
 el agente revisor (RF7). Cuando se desactiva, el sistema produce las
 preguntas únicamente con el agente generador, sin revisión posterior. Este
 mecanismo cumple una doble función: ofrece una modalidad de generación más
-rápida y, sobre todo, habilita el estudio de ablación descrito en la
-sección~\ref{sec:ablacion}, al permitir comparar el sistema completo con
+rápida y, sobre todo, habilita el estudio de ablación cuyo diseño se detalla en la
+sección~\ref{sec:diseno-ablacion}, al permitir comparar el sistema completo con
 una variante sin revisor sin más que modificar un parámetro. Como toda
 la configuración está en parámetros, el comportamiento del
 sistema puede ajustarse sin tocar el código, cumpliendo el requisito
@@ -301,7 +303,12 @@ construye el árbol sintáctico de cada archivo. A partir de ese árbol se
 recorren los nodos de nivel superior y se identifican las definiciones de
 funciones y clases ---incluidas las que llevan decoradores
 (\texttt{@staticmethod}, \texttt{@dataclass}, etc.)---, que se
-encapsulan en la estructura \texttt{UnidadCodigo}. Esta estructura reúne,
+encapsulan en la estructura \texttt{UnidadCodigo}. Cuando una clase es pequeña
+y cohesionada se conserva como una sola unidad; cuando es extensa, se descompone
+en sus métodos con lógica ---nombrados \texttt{Clase.metodo} para no perder el
+contexto---, pues una clase de gran tamaño es demasiado amplia para fundamentar
+una pregunta enfocada. Los métodos especiales y los accesores triviales los
+descarta el filtrado posterior. Esta estructura reúne,
 para cada unidad, su tipo, su nombre, su código fuente, su documentación y
 dos datos derivados de su posición en el archivo y de su árbol sintáctico:
 el número de líneas y el número de estructuras de control que contiene.
@@ -312,14 +319,17 @@ explícito. El resto del sistema invoca siempre la función
 \texttt{extraer\_unidades}, que selecciona el analizador adecuado según la
 extensión del archivo. Añadir soporte para un nuevo lenguaje se reduce, por
 tanto, a implementar su analizador y registrarlo, sin modificar ninguna
-otra parte del sistema.
+otra parte del sistema. Esta extensibilidad no se ha quedado en lo potencial:
+además del analizador de Python se ha implementado uno para Java, de manera que
+el sistema procesa ambos lenguajes sin más cambio que el registro del nuevo
+analizador, lo que evidencia el requisito de extensibilidad (RNF1).
 
 \begin{pythoncode}[title={parser.py --- registro de analizadores por lenguaje}]
 BackendFn = Callable[[Path], list[UnidadCodigo]]
 
 _BACKENDS: dict[str, BackendFn] = {
     ".py": _extraer_python,
-    # ".java": _extraer_java,   # añadir un lenguaje = registrar su backend
+    ".java": _extraer_java,    # un lenguaje nuevo = registrar su backend
 }
 
 def extraer_unidades(ruta: str | Path) -> list[UnidadCodigo]:
@@ -491,11 +501,11 @@ esperado. La tabla~\ref{tab:pruebas-unitarias} resume su cobertura.
     \toprule
     Componente & N.\textsuperscript{o} de pruebas \\
     \midrule
-    Análisis de código (extracción de unidades)      & 6 \\
+    Análisis de código (extracción de unidades, Python y Java) & 11 \\
     Filtrado de unidades triviales                    & 4 \\
     Deducción del veredicto del revisor               & 6 \\
     \midrule
-    Total                                             & 16 \\
+    Total                                             & 21 \\
     \bottomrule
   \end{tabular}
 \end{table}
@@ -521,3 +531,58 @@ tipo solicitado acompañada de su veredicto y del comentario del revisor,
 con la estructura esperada. La valoración de si esas preguntas son, además,
 útiles y de calidad ---esto es, su evaluación pedagógica--- se aborda en el
 capítulo~\ref{cap:resultados}.
+
+
+\section{Diseño del estudio de ablación}
+\label{sec:diseno-ablacion}
+
+Uno de los objetivos del trabajo plantea determinar en qué medida el agente
+revisor mejora la calidad de las preguntas generadas. Para responder a esta
+pregunta de forma controlada se ha diseñado un estudio de ablación, cuyo
+planteamiento se detalla en esta sección; sus resultados se presentan en el
+capítulo~\ref{cap:resultados}.
+
+\subsection{Variable manipulada y procedimiento}
+
+La única variable que se manipula es la presencia del agente revisor. Para
+evitar que la no determinación del modelo generador contamine la comparación,
+se genera una sola vez el conjunto de preguntas sobre el corpus y, sobre ese
+mismo conjunto, se contrastan dos configuraciones: la del \textbf{sistema
+completo}, que entrega únicamente las preguntas aprobadas por el revisor, y la
+del \textbf{sistema sin revisor}, que entrega todas las preguntas generadas.
+De este modo, ambas variantes parten exactamente de las mismas preguntas y la
+única diferencia entre ellas es la intervención del revisor, lo que aísla su
+aportación. El cambio entre una y otra configuración se reduce a un parámetro,
+gracias al diseño descrito en la sección~\ref{sec:diseno-contexto}.
+
+\subsection{Corpus de evaluación}
+
+El estudio se realiza sobre código real procedente de proyectos de prácticas,
+del que se extraen las unidades evaluables con el propio analizador del sistema
+(sección~\ref{sec:impl-parser}), descartando las triviales. El corpus abarca
+dos lenguajes ---Python y Java--- y dominios distintos, de manera que el
+estudio sirve también para observar si el comportamiento del revisor se
+generaliza más allá de un único lenguaje, en línea con el requisito de
+extensibilidad (RNF1).
+
+\subsection{Evaluación de la calidad}
+
+Como la calidad de una pregunta no admite una medida automática directa, cada
+pregunta generada se clasifica según un criterio objetivo: se considera
+\emph{defectuosa} si es técnicamente incorrecta ---su respuesta no se
+corresponde con el código---, si es ambigua ---sin una respuesta única--- o si
+no puede verificarse con el código mostrado. Esta clasificación la realiza un
+modelo de lenguaje externo que actúa como juez imparcial
+(\emph{LLM-as-judge})~\parencite{zheng2023llmjudge}, distinto y más capaz que
+el modelo generador para reducir sesgos, y se contrasta con una valoración
+humana sobre una muestra, que sirve de anclaje frente al juez automático. El juez
+es independiente del agente revisor: este último forma parte de la generación,
+mientras que el juez interviene solo en la evaluación de los resultados.
+
+\subsection{Métricas}
+
+A partir de estas etiquetas se comparan dos magnitudes entre ambas
+configuraciones: la proporción de preguntas defectuosas que llegan a
+entregarse y la capacidad del revisor para detectar las defectuosas, expresada
+en términos de precisión y exhaustividad. Los valores obtenidos se recogen en
+el capítulo~\ref{cap:resultados}.

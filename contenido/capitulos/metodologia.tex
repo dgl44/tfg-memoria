@@ -210,15 +210,9 @@ asignatura repercute en las preguntas producidas.
 Como estudio complementario se plantea una ablación que justifica la
 decisión de incorporar un agente revisor al sistema. El experimento
 compara el sistema completo con una variante en la que se desactiva
-dicho agente, dejando únicamente la generación directa de preguntas, con
-el fin de determinar en qué medida la revisión automática mejora la
-calidad del resultado respecto a una generación sin postprocesado. Con
-este fin, se generan preguntas sobre un mismo conjunto de código en
-ambas configuraciones y se comparan los resultados. La comparación se
-realiza con una rúbrica que valora aspectos como la corrección técnica,
-la claridad del enunciado y la adecuación al nivel. Para aligerar la
-evaluación manual, se contempla emplear además un modelo de lenguaje
-externo como juez automático~\parencite{zheng2023llmjudge}. Conviene aclarar que este juez es
-independiente del agente revisor: el revisor forma parte del proceso de
-generación de preguntas, mientras que el juez interviene solo en la fase
-de evaluación, como evaluador imparcial de los resultados.
+dicho agente, con el fin de determinar en qué medida la revisión
+automática mejora la calidad de las preguntas respecto a una generación
+sin postprocesado. Su diseño concreto ---corpus, procedimiento, criterio
+de evaluación y métricas--- se detalla en el capítulo de desarrollo
+(sección~\ref{sec:diseno-ablacion}), donde encaja junto a la construcción
+del sistema sobre el que se realiza.
