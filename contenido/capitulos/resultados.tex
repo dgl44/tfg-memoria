@@ -155,9 +155,43 @@ encaja en un examen--- que la herramienta por sí sola no tiene.
 \section{Demostración de configurabilidad}
 \label{sec:res-configurabilidad}
 
-% TODO: incluir el ejemplo cualitativo de configurabilidad (una misma unidad de
-% código generando preguntas distintas al variar el nivel de dificultad y el
-% tipo de pregunta), para ilustrar cómo los parámetros del contexto académico
-% condicionan la salida.
-\noindent\textit{[Pendiente: ejemplo cualitativo de una misma unidad con
-distintos parámetros (nivel y tipo).]}
+Para ilustrar la configurabilidad del sistema (RF6, RNF3) se toma una misma
+unidad de código ---la implementación del algoritmo A\textsuperscript{*}
+(\texttt{a\_estrella}), que busca el camino de menor coste expandiendo nodos y
+manteniendo una lista frontera y una lista interior--- y se generan preguntas
+variando los parámetros del contexto académico.
+
+Al cambiar el \textbf{tipo de pregunta}, el sistema produce formatos claramente
+distintos sobre esta misma función:
+
+\begin{itemize}
+  \item \textbf{Opción múltiple:} plantea el comportamiento del algoritmo ante
+        una situación concreta ---por ejemplo, qué hace al encontrar un nodo que
+        ya está en la lista frontera con un coste menor--- con cuatro opciones
+        (A--D) de las que solo una es correcta.
+  \item \textbf{Traza:} propone una ejecución concreta ---origen $(0,0)$ y
+        destino $(2,2)$ en un mapa $5\times5$ sin obstáculos y con heurística
+        octile--- y pide el valor retornado, cuántos nodos llegan a la lista
+        interior y el coste $g$ del nodo destino.
+  \item \textbf{Respuesta abierta:} «Explica qué sucede en el bloque
+        \texttt{elif nueva\_g < g\_antigua[0]} y por qué es necesario en
+        A\textsuperscript{*}; ¿qué representan \texttt{nueva\_g} y
+        \texttt{g\_antigua[0]}, y qué efecto tiene \texttt{modifica\_nodo()}
+        sobre la búsqueda del camino óptimo?»
+\end{itemize}
+
+El \textbf{nivel de dificultad} condiciona igualmente la salida. Una pregunta
+de nivel \emph{básico} plantea el
+comportamiento en términos conceptuales: «un nodo hijo ya está en la lista
+frontera con un coste $g$ de 8{,}5 y el nuevo camino tiene coste 7{,}8; ¿qué
+hace el algoritmo y por qué?». Una de nivel \emph{avanzado}, en cambio, exige
+razonar sobre los detalles de la implementación, citando las propias variables
+y condiciones del código: «al existir ya el nodo con
+\texttt{g\_antigua[0] = 15} y calcularse \texttt{nueva\_g = 12}, ¿qué
+consecuencia tiene según la condición \texttt{elif nueva\_g < g\_antigua[0]}?».
+La versión avanzada obliga a conocer el código con más finura, no solo su
+comportamiento general.
+
+Esta demostración confirma que los parámetros del contexto académico no son
+meramente informativos, sino que condicionan de forma efectiva las preguntas
+generadas, tal como exigen los requisitos de configurabilidad.
