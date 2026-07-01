@@ -1,6 +1,163 @@
 \chapter{Resultados}
 \label{cap:resultados}
 
-\noindent\textit{[Pendiente de redactar.]}
+Este capítulo presenta la evaluación de la herramienta, que tiene dos partes:
+el \emph{estudio de ablación} del agente revisor
+(sección~\ref{sec:res-ablacion}), que mide cuánto aporta a la calidad de las
+preguntas siguiendo el diseño descrito en la sección~\ref{sec:diseno-ablacion}; y la \emph{validación de utilidad}
+(sección~\ref{sec:res-utilidad}), en la que un docente valora si
+las preguntas generadas sirven para comprobar si el alumno entiende su código. Se cierra con una demostración cualitativa de la
+configurabilidad del sistema (sección~\ref{sec:res-configurabilidad}).
 
-% TODO: Redactar los resultados y la evaluación.
+
+\section{Estudio de ablación del agente revisor}
+\label{sec:res-ablacion}
+
+\subsection{Corpus y configuración}
+\label{sec:res-corpus}
+
+El estudio se ha realizado sobre un corpus de \textbf{56 unidades de código}
+extraídas de proyectos de prácticas reales, procesadas con el propio analizador
+del sistema tras descartar las triviales. El corpus combina dos lenguajes y
+dominios distintos: \textbf{36 unidades en Python} ---procedentes de una
+práctica de búsqueda heurística (algoritmos A\textsuperscript{*} y
+A\textsuperscript{*}$\varepsilon$) y de un sistema distribuido de
+gestión de taxis--- y \textbf{20 unidades en Java} ---de prácticas de
+programación orientada a objetos---. Con esta variedad se puede ver además si el sistema funciona más allá de un
+solo lenguaje.
+
+Sobre cada unidad se generó una pregunta, repartiendo de forma equilibrada los
+tres tipos (opción múltiple, traza y respuesta abierta). La comparación entre
+el sistema \emph{con} y \emph{sin} revisor se realizó sobre el mismo conjunto de
+preguntas generadas, de modo que la única diferencia entre ambas
+configuraciones es la intervención del agente revisor.
+
+\subsection{Evaluación de la calidad}
+\label{sec:res-evaluacion}
+
+Cada pregunta se clasificó como \emph{correcta} o \emph{defectuosa} según un
+criterio objetivo: se consideró defectuosa si era técnicamente incorrecta, si
+resultaba ambigua (varias o ninguna opción válida) o si su respuesta no podía
+verificarse con el código mostrado. Esta clasificación la realizó un modelo de
+lenguaje externo como juez imparcial
+(\emph{LLM-as-judge})~\parencite{zheng2023llmjudge}, distinto y más capaz que el
+modelo generador, y sin acceso al veredicto del agente revisor.
+
+Para comprobar cómo de fiable es este juez, sus etiquetas se compararon con las
+de otro modelo distinto sobre una muestra. El
+acuerdo entre ambos fue moderado y, lo más llamativo, los desacuerdos eran casi
+siempre \textbf{errores técnicos sutiles} que uno de los modelos no detectaba.
+Esto ya es un resultado en sí mismo: la
+evaluación automática de la corrección no es del todo fiable, así que tiene
+sentido que sea el docente quien tenga la última palabra, como propone la
+herramienta.
+
+\subsection{Resultados de la ablación}
+\label{sec:res-ablacion-datos}
+
+La tabla~\ref{tab:ablacion} resume los resultados. La columna \emph{calidad
+bruta} indica el porcentaje de preguntas correctas que produce el generador sin
+revisión; la columna \emph{con revisor}, el porcentaje de correctas entre las
+que el sistema entrega tras descartar las que el revisor rechaza. Las tres
+últimas columnas miden lo bien que el revisor \emph{detecta} las preguntas
+defectuosas, tomando cada rechazo como su forma de marcar una pregunta mala.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Resultados del estudio de ablación del agente revisor.}
+  \label{tab:ablacion}
+  \begin{tabular}{lccccc}
+    \toprule
+    & \multicolumn{2}{c}{Calidad de las preguntas} & \multicolumn{3}{c}{Revisor como detector} \\
+    \cmidrule(lr){2-3}\cmidrule(lr){4-6}
+    Corpus & Bruta & Con revisor & Precisión & Cobertura & $F_1$ \\
+    \midrule
+    Python ($n=36$) & 83\,\% & \textbf{100\,\%} & 67\,\% & 100\,\% & 0{,}80 \\
+    Java ($n=20$)   & 80\,\% & 89\,\%           & 100\,\% & 50\,\% & 0{,}67 \\
+    \midrule
+    Total ($n=56$)  & 82\,\% & \textbf{96\,\%}  & 73\,\% & 80\,\% & 0{,}76 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+La tabla permite señalar varios puntos. Por un lado, la \textbf{calidad bruta
+ya es alta} (82\,\%): la mayoría de las preguntas que genera el sistema son
+correctas. Por otro, el \textbf{revisor mejora de forma notable} la calidad del
+conjunto entregado, que sube del 82\,\% al 96\,\% en total y llega al 100\,\%
+en Python, donde detecta todas las preguntas defectuosas. Esta mejora tiene un
+coste: con una precisión del 67\,\% en Python, el revisor rechaza también
+alguna pregunta correcta; es decir, actúa de forma conservadora, prefiriendo
+descartar de más antes que dejar pasar una defectuosa. Como es el docente quien
+elige finalmente las preguntas, esa cautela no supone un problema.
+
+El comportamiento \textbf{difiere entre lenguajes}. En Python el revisor es muy
+eficaz ($F_1$ = 0{,}80, cobertura del 100\,\%), mientras que en
+Java su cobertura baja al 50\,\%: se le escapan la mitad de las preguntas
+defectuosas, aunque las que rechaza son siempre defectos reales (precisión del
+100\,\%). Esto apunta a que tanto la generación como la revisión funcionan mejor con
+Python, y deja el soporte de otros lenguajes como una mejora pendiente.
+
+De las 56 preguntas, el revisor emitió 14 veredictos de aprobación directa, 31
+de aprobación con sugerencias y 11 de rechazo. El predominio de la
+\emph{aprobación con sugerencias} indica que el revisor tiende a acompañar sus
+veredictos de observaciones de mejora en lugar de limitarse a un juicio binario.
+
+\subsection{Análisis por tipo de pregunta}
+\label{sec:res-tipos}
+
+Desglosando la calidad bruta por tipo de pregunta se aprecia que las preguntas
+de \textbf{traza} son las más difíciles de generar correctamente (68\,\% de
+correctas), frente al 84\,\% de las de opción múltiple y el 94\,\% de las
+abiertas. Tiene sentido: una pregunta de traza obliga al modelo a simular la ejecución
+paso a paso, y basta con que falle un paso para que quede mal, mientras que una
+pregunta abierta admite más margen en la respuesta. Es también en las
+preguntas de traza donde el agente revisor aporta un valor más claro, al ser el
+tipo con mayor proporción de defectos que conviene filtrar.
+
+
+\section{Validación de utilidad con el docente}
+\label{sec:res-utilidad}
+
+El estudio de ablación mide la \emph{corrección} de las preguntas, pero no su
+\emph{utilidad} pedagógica. Para valorar esta última se recurrió al criterio de
+un docente en activo ---tutor del trabajo y profesor de una de las asignaturas
+de las que procede el código---, a quien se pidió que juzgara, sobre una
+muestra, si usaría cada pregunta para evaluar la comprensión del alumno.
+
+Esta validación dejó una conclusión relevante: la mayoría de los reparos del
+docente no eran sobre la corrección técnica de las preguntas, sino sobre su
+\textbf{contexto} y su \textbf{enfoque}. En
+concreto, se identificaron dos limitaciones:
+
+\begin{itemize}
+  \item \textbf{Código de plantilla.} Varias preguntas se generaban sobre
+        código que forma parte del \emph{esqueleto} proporcionado por el
+        profesorado, y no del escrito por el alumno. Evaluar la comprensión de
+        código que el estudiante no ha desarrollado carece de sentido. Este
+        hallazgo motivó la incorporación de una función que, dada la plantilla
+        de partida, descarta las unidades que el alumno no ha modificado, de
+        modo que el sistema solo genera preguntas sobre su código propio.
+  \item \textbf{Enfoque de las preguntas abiertas.} Algunas preguntas abiertas
+        pedían proponer mejoras de diseño o identificar limitaciones, tareas
+        poco adecuadas para evaluar la comprensión de un código ya entregado.
+        A raíz de esta observación se ajustaron las instrucciones del generador
+        para centrar las preguntas abiertas en la comprensión del código tal
+        como está.
+\end{itemize}
+
+Ambas mejoras se aplicaron a partir de este feedback, lo que refleja el
+desarrollo iterativo del trabajo. Además de las correcciones concretas, esta
+validación confirma que el docente es una pieza clave del proceso: aporta un
+conocimiento del contexto ---qué código es del alumno, qué tipo de pregunta
+encaja en un examen--- que la herramienta por sí sola no tiene.
+
+
+\section{Demostración de configurabilidad}
+\label{sec:res-configurabilidad}
+
+% TODO: incluir el ejemplo cualitativo de configurabilidad (una misma unidad de
+% código generando preguntas distintas al variar el nivel de dificultad y el
+% tipo de pregunta), para ilustrar cómo los parámetros del contexto académico
+% condicionan la salida.
+\noindent\textit{[Pendiente: ejemplo cualitativo de una misma unidad con
+distintos parámetros (nivel y tipo).]}
