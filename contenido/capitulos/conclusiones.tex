@@ -1,6 +1,109 @@
 \chapter{Conclusiones y trabajo futuro}
 \label{cap:conclusiones}
 
-\noindent\textit{[Pendiente de redactar.]}
+Este trabajo ha abordado el problema de verificar la comprensión real que un
+estudiante tiene del código que entrega, un reto acentuado por la facilidad con
+la que hoy puede generarse código mediante herramientas de inteligencia
+artificial. Como respuesta, se ha diseñado, implementado y evaluado una
+herramienta que genera de forma automática exámenes escritos y personalizados
+sobre el código de cada alumno. Este capítulo recoge el grado de cumplimiento
+de los objetivos, las limitaciones detectadas y las líneas de trabajo futuro.
 
-% TODO: Redactar las conclusiones y las líneas de trabajo futuro.
+
+\section{Cumplimiento de los objetivos}
+\label{sec:cumplimiento-objetivos}
+
+El \textbf{objetivo general} ---diseñar, implementar y evaluar una herramienta
+que genere un examen personalizado a partir del código entregado--- se ha
+alcanzado: el sistema recorre una carpeta de código, extrae sus unidades,
+genera preguntas de distintos tipos revisadas por un sistema multi-agente y
+produce el examen final. En cuanto a los objetivos específicos:
+
+\begin{itemize}
+  \item \textbf{Análisis de código (objetivo 1).} Se ha implementado un módulo
+        basado en \emph{tree-sitter} que extrae funciones, métodos y clases de
+        una carpeta completa y descarta las unidades triviales. Su
+        arquitectura, organizada como un registro de analizadores por lenguaje,
+        resultó efectivamente extensible: se añadió soporte para Java sin tocar
+        el resto del sistema. A raíz de la validación con el docente se
+        incorporó, además, la capacidad de descartar el código de plantilla, de
+        modo que solo se evalúa el código que el alumno ha escrito.
+  \item \textbf{Generación multi-agente (objetivo 2).} Se ha construido un
+        sistema \emph{generador-revisor} que produce preguntas de opción
+        múltiple, de traza y de respuesta abierta, adaptadas al código y al
+        nivel académico configurado.
+  \item \textbf{Estudio de ablación (objetivo 3).} Se ha comparado la calidad
+        de las preguntas con y sin el agente revisor. El revisor mejora la
+        calidad del conjunto entregado ---del 82\,\% al 96\,\% de preguntas
+        correctas---, y es especialmente eficaz en Python.
+  \item \textbf{Interfaz y salida (objetivo 4).} Se ha desarrollado una
+        interfaz web que permite aportar el código, configurar el contexto
+        académico y obtener el examen, con salida en PDF y también en Word
+        editable.
+  \item \textbf{Validación (objetivo 5).} La herramienta se ha probado sobre
+        código real de prácticas de asignaturas de informática, en dos
+        lenguajes, y sus preguntas se han sometido al criterio de un docente en
+        activo.
+\end{itemize}
+
+
+\section{Aportaciones y hallazgos}
+\label{sec:aportaciones}
+
+Además de la propia herramienta, el trabajo deja algunas conclusiones
+interesantes. El estudio de ablación aporta evidencia de que incorporar un segundo
+agente revisor mejora la calidad de las preguntas generadas. Al mismo tiempo,
+tanto la evaluación automática ---en la que un modelo juez se dejaba errores
+técnicos sutiles--- como la validación con el docente ---que detectó problemas
+de contexto que el sistema no podía ver por sí solo, como el uso de código de
+plantilla--- apuntan en la misma dirección: la herramienta rinde mejor como
+\textbf{apoyo al docente} que como sustituto, dejando en sus manos la decisión
+final sobre las preguntas.
+
+
+\section{Limitaciones}
+\label{sec:limitaciones}
+
+El trabajo presenta varias limitaciones. La calidad de las preguntas es
+\textbf{menor en Java que en Python}, lo que indica que tanto la generación
+como la revisión están mejor ajustadas a este último. La evaluación automática
+de la corrección mediante un modelo juez \textbf{no es del todo fiable} en los
+errores más sutiles. La validación de utilidad es \textbf{todavía limitada}, al basarse en el
+criterio de un solo docente y sobre una muestra reducida. Por último, el sistema genera preguntas sobre \textbf{unidades de
+código aisladas} y no evalúa la comprensión de las relaciones entre ellas.
+
+
+\section{Trabajo futuro}
+\label{sec:trabajo-futuro}
+
+De las limitaciones anteriores y del propio desarrollo surgen varias líneas de
+trabajo futuro:
+
+\begin{itemize}
+  \item \textbf{Comprensión global del proyecto.} Extender el sistema para
+        generar preguntas sobre las relaciones entre unidades ---llamadas entre
+        funciones, colaboración entre clases--- y no solo sobre unidades
+        aisladas.
+  \item \textbf{Soporte de más lenguajes.} Ampliar el registro de analizadores
+        con nuevos lenguajes y, sobre todo, mejorar la calidad de la generación
+        y la revisión en lenguajes distintos de Python.
+  \item \textbf{Entrada desde repositorios remotos.} Permitir tomar el código
+        directamente de una URL ---por ejemplo, un repositorio de GitHub---,
+        además de desde una carpeta local.
+  \item \textbf{Estudio sistemático de los \emph{prompts}.} Analizar de forma
+        controlada cómo afectan distintas formulaciones de las instrucciones a
+        la calidad de las preguntas.
+  \item \textbf{Validación a gran escala.} Someter la herramienta al criterio
+        de más docentes y sobre más código, para respaldar los resultados con
+        una muestra mayor.
+\end{itemize}
+
+
+\section{Valoración final}
+\label{sec:valoracion-final}
+
+En conjunto, el trabajo ha cumplido sus objetivos: se ha construido una
+herramienta funcional que genera exámenes personalizados sobre el código de
+cada estudiante y se ha evaluado su comportamiento. Los resultados muestran que
+la herramienta es viable y útil como apoyo al docente y, a la vez, dejan claro
+por dónde puede seguir mejorando.
