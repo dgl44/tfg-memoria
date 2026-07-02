@@ -1,8 +1,92 @@
 \chapter{Introducción}
 \label{cap:introduccion}
 
-\noindent\textit{[Pendiente de redactar.]}
+La programación es una competencia central en los estudios de informática, y su
+aprendizaje se evalúa en buena medida a través del código que el estudiante
+produce. La irrupción de los asistentes de programación basados en inteligencia
+artificial ha alterado esa premisa: hoy es posible obtener código funcional a
+partir de una simple descripción en lenguaje natural, sin necesidad de entender
+cómo funciona. Se abre así una brecha entre lo que un alumno entrega y lo que
+realmente comprende.
 
-% TODO: Redactar el capítulo de introducción.
-% Recomendación: escribir este capítulo al final, cuando el resto del trabajo
-% esté terminado, para poder presentar fielmente lo que se ha hecho.
+Y esto tiene consecuencias importantes. Los grandes modelos de lenguaje se han integrado
+con rapidez en el trabajo diario de cualquier programador, y con ellos resulta
+inmediato producir soluciones a los ejercicios habituales de las asignaturas de
+programación. El problema para la evaluación es doble: por un lado afecta a la
+integridad académica, ya que un trabajo entregado puede no reflejar el esfuerzo
+del estudiante; por otro, y más relevante, dificulta comprobar si ha existido un
+aprendizaje real, que es en última instancia lo que la evaluación debe medir.
+
+Para el profesorado, comprobar esa comprensión de forma individual es difícil de
+llevar a la práctica. Un examen oral sobre el código de cada estudiante sería lo
+ideal, pero no resulta viable en asignaturas con decenas o cientos de alumnos.
+Hace falta, por tanto, alguna forma de evaluar la comprensión del código a una
+escala razonable, sin renunciar a que las preguntas estén adaptadas al trabajo
+concreto de cada estudiante.
+
+Una solución genérica no es suficiente. Un examen escrito común para toda la
+clase mide conocimientos generales, pero no si un estudiante concreto entiende
+el código que él ha entregado. Para lograrlo, las preguntas deben partir de ese
+código en particular, lo que multiplica el trabajo del docente si tuviera que
+prepararlas a mano para cada alumno. Es precisamente ese esfuerzo el que tiene
+sentido automatizar.
+
+
+\section{Propuesta}
+\label{sec:intro-propuesta}
+
+Este trabajo propone una herramienta que aborda ese problema automatizando la
+generación de exámenes escritos y personalizados. A partir del código fuente que
+entrega un estudiante, la herramienta analiza el proyecto, extrae sus unidades
+relevantes y genera, para cada una, preguntas de distintos tipos ---opción
+múltiple, traza de ejecución y respuesta abierta--- adaptadas a ese código. Para
+elevar su calidad, un segundo agente revisa las preguntas antes de proponerlas
+al docente, que decide cuáles incorpora al examen final. De este modo, el
+profesor obtiene un examen individualizado con el que verificar si el alumno
+comprende lo que ha entregado, sin dejar de ser el responsable último de la
+evaluación.
+
+El sistema que genera las preguntas sigue un enfoque \emph{multi-agente}: un
+agente redacta cada pregunta y un segundo agente la revisa, un esquema pensado
+para elevar la calidad del resultado. Además, el comportamiento de la
+herramienta es configurable ---nivel de dificultad, tipos de pregunta y contexto
+de la asignatura--- y el examen se entrega tanto en un formato imprimible (PDF)
+como en uno editable (Word), de modo que el docente pueda ajustarlo antes de
+administrarlo.
+
+El objetivo general del trabajo es diseñar, implementar y evaluar esta
+herramienta; los objetivos concretos que lo desarrollan se detallan en el
+capítulo~\ref{cap:objetivos}.
+
+
+\section{Alcance}
+\label{sec:intro-alcance}
+
+La herramienta parte del código que el alumno entrega en una carpeta local y su
+cometido llega hasta la generación del examen escrito: la corrección de las respuestas del estudiante queda fuera del
+alcance y sigue correspondiendo al docente. En coherencia con ello, la
+herramienta se plantea como un apoyo a su labor y no como un sustituto, siendo
+él quien decide qué preguntas incorpora y quién evalúa finalmente al alumno.
+
+
+\section{Estructura de la memoria}
+\label{sec:intro-estructura}
+
+El resto de la memoria se organiza como sigue:
+
+\begin{itemize}
+  \item El capítulo~\ref{cap:estado-arte} (\emph{Estado del arte}) revisa los
+        trabajos relacionados con la generación automática de preguntas a partir
+        de código y los sistemas multi-agente basados en modelos de lenguaje.
+  \item El capítulo~\ref{cap:objetivos} (\emph{Objetivos}) fija el objetivo
+        general y los objetivos específicos del trabajo.
+  \item El capítulo~\ref{cap:metodologia} (\emph{Metodología}) describe el
+        enfoque de trabajo seguido y las tecnologías empleadas.
+  \item El capítulo~\ref{cap:desarrollo} (\emph{Desarrollo}) detalla el análisis
+        de requisitos, el diseño del sistema, su implementación y las pruebas.
+  \item El capítulo~\ref{cap:resultados} (\emph{Resultados}) presenta la
+        evaluación de la herramienta: el estudio de ablación del agente revisor
+        y la validación de utilidad con un docente.
+  \item El capítulo~\ref{cap:conclusiones} (\emph{Conclusiones y trabajo futuro})
+        recoge las conclusiones y las líneas de mejora.
+\end{itemize}
