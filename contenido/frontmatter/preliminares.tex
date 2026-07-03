@@ -33,12 +33,27 @@
 \chapter*{Resumen}
 \addcontentsline{toc}{chapter}{Resumen}
 
-\noindent\textit{[Pendiente de redactar.]}
+\noindent La facilidad con la que hoy puede generarse código mediante
+inteligencia artificial dificulta comprobar si un estudiante entiende realmente
+lo que entrega, sobre todo en asignaturas con muchos alumnos, donde evaluar de
+forma individual a cada uno no resulta viable. Este trabajo presenta una
+herramienta que aborda ese problema generando de forma automática exámenes
+escritos y personalizados a partir del código de cada estudiante. La herramienta
+analiza el proyecto con \emph{tree-sitter}, extrae sus unidades de código y
+genera, para cada una, preguntas de opción múltiple, de traza de ejecución y de
+respuesta abierta adaptadas a ese código; un segundo agente revisa cada pregunta
+siguiendo el patrón generador-crítico, y el docente decide cuáles conserva y
+descarga el examen en PDF o en Word para adaptarlo a su gusto. La evaluación
+combina un estudio de ablación del agente revisor ---que muestra que su
+intervención mejora de forma apreciable la calidad de las preguntas--- con una
+valoración cualitativa de su utilidad pedagógica. Los resultados indican que la
+propuesta es viable y útil como apoyo al docente, que conserva en todo momento
+la última palabra sobre la evaluación.
 
-% TODO: Redactar el resumen del trabajo (en el idioma principal).
-
-\textbf{Palabras clave:} \textit{[Pendientes.]}
-% TODO: lista de palabras clave separadas por comas.
+\vspace{1em}
+\noindent\textbf{Palabras clave:} generación automática de preguntas;
+comprensión de código; sistemas multi-agente; grandes modelos de lenguaje;
+evaluación educativa.
 
 \cleardoublepage
 
@@ -49,12 +64,25 @@
 \chapter*{Abstract}
 \addcontentsline{toc}{chapter}{Abstract}
 
-\noindent\textit{[To be written.]}
+\noindent The ease with which code can now be produced using artificial
+intelligence makes it hard to check whether a student genuinely understands what
+they submit, particularly in courses with many students, where assessing each
+one individually is not feasible. This work presents a tool that addresses this
+problem by automatically generating written, personalized exams from each
+student's code. The tool analyses the project with \emph{tree-sitter}, extracts
+its code units and generates, for each one, multiple-choice, execution-trace and
+open-ended questions tailored to that code; a second agent reviews each question
+following the generator-critic pattern, and the teacher chooses which ones to
+keep and downloads the exam in PDF or Word to adapt it. The evaluation combines
+an ablation study of the reviewer agent ---showing that its intervention
+noticeably improves question quality--- with a qualitative assessment of its
+pedagogical usefulness. The results indicate that the proposal is viable and
+useful as support for the teacher, who retains the final say over the
+assessment at all times.
 
-% TODO: Write the abstract in English.
-
-\textbf{Keywords:} \textit{[Pending.]}
-% TODO: comma-separated keywords.
+\vspace{1em}
+\noindent\textbf{Keywords:} automatic question generation; code comprehension;
+multi-agent systems; large language models; educational assessment.
 
 \end{otherlanguage}
 
