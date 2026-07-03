@@ -215,6 +215,9 @@ out/
 # Excepción: el PDF de ejemplo de la plantilla original sí se versiona
 !main-template-example.pdf
 
+# Excepción: figuras en PDF (assets de la memoria, se versionan)
+!recursos/figuras/*.pdf
+
 # ============================================================================
 # ARCHIVOS TEMPORALES Y RESPALDO
 # ============================================================================

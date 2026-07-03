@@ -448,7 +448,31 @@ final es suya. Esta distinción entre lo que el sistema propone y lo que el
 docente aprueba se apoya en el resultado estructurado descrito en la
 sección~\ref{sec:diseno-resultado}, que permite mostrar por separado el
 enunciado y la crítica. La interfaz es un prototipo funcional, orientado a
-cubrir el flujo completo más que al acabado visual.
+cubrir el flujo completo más que al acabado visual. Las
+figuras~\ref{fig:web-config} a~\ref{fig:web-descarga} recorren ese flujo: la
+configuración del contexto y la subida del código, una pregunta generada con su
+veredicto y su justificación, y la descarga del examen final.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=\textwidth, alt={Pantalla de la interfaz web con la barra lateral de configuración (asignatura, curso, titulación, nivel, tipos de pregunta y revisor) y la zona para subir el proyecto en un archivo comprimido}]{recursos/figuras/web_config.png}
+  \caption{Configuración del contexto académico y subida del código del proyecto.}
+  \label{fig:web-config}
+\end{figure}
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.78\textwidth, alt={Una pregunta generada en la interfaz, con su veredicto de aprobación, el enunciado con las opciones, la respuesta correcta y la justificación del revisor}]{recursos/figuras/web_pregunta.png}
+  \caption{Pregunta generada con el veredicto del revisor, la respuesta correcta y la justificación.}
+  \label{fig:web-pregunta}
+\end{figure}
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.85\textwidth, alt={Sección de descarga del examen con el campo para el título y los botones de descarga en Word o en PDF}]{recursos/figuras/web_descarga.png}
+  \caption{Descarga del examen final en formato Word o PDF.}
+  \label{fig:web-descarga}
+\end{figure}
 
 \subsection{Generación del examen}
 \label{sec:impl-salida}
@@ -469,6 +493,16 @@ unidad se adjunta a cada pregunta, el sistema evita duplicarlo: si el
 enunciado ya lo reproduce ---algo que el modelo hace en ocasiones pese a las
 instrucciones en contra---, se omite el bloque de código adjunto, detectando
 la coincidencia a partir de la cabecera de la función o la clase.
+
+La figura~\ref{fig:examen} reproduce la primera página de un examen generado por
+la herramienta, tal y como lo recibiría el alumno.
+
+\begin{figure}[htbp]
+  \centering
+  \fbox{\includegraphics[page=1, width=0.82\textwidth, alt={Primera página de un examen generado: cabecera con el título del examen y los campos de nombre y fecha, seguida de una pregunta de traza de ejecución con su enunciado y el código de la función correspondiente}]{recursos/figuras/examen_ejemplo.pdf}}
+  \caption{Primera página de un examen generado por la herramienta.}
+  \label{fig:examen}
+\end{figure}
 
 
 \section{Pruebas}
