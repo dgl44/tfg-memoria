@@ -223,9 +223,10 @@ de los que no cabe esperar una pregunta de valor.
 
 El componente central del sistema es el responsable de transformar cada
 unidad de código en una pregunta de examen. Su diseño adopta el patrón
-generador-revisor descrito en el capítulo~\ref{cap:estado-arte}: un primer
-agente formula la pregunta y un segundo la somete a una revisión crítica,
-emitiendo un veredicto sobre su calidad (RF4 y RF5).
+\emph{generator-critic} descrito en el capítulo~\ref{cap:estado-arte}, que en
+este trabajo se materializa como un \textbf{agente generador} y un
+\textbf{agente revisor}: el primero formula la pregunta y el segundo la somete a
+una revisión crítica, emitiendo un veredicto sobre su calidad (RF4 y RF5).
 
 El \textbf{agente generador} recibe una unidad de código y produce una
 pregunta del tipo solicitado ---de opción múltiple, de traza de ejecución
@@ -503,9 +504,10 @@ esperado. La tabla~\ref{tab:pruebas-unitarias} resume su cobertura.
     \midrule
     Análisis de código (extracción de unidades, Python y Java) & 11 \\
     Filtrado de unidades triviales                    & 4 \\
+    Exclusión de código de plantilla                  & 3 \\
     Deducción del veredicto del revisor               & 6 \\
     \midrule
-    Total                                             & 21 \\
+    Total                                             & 24 \\
     \bottomrule
   \end{tabular}
 \end{table}

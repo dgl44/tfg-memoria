@@ -60,7 +60,12 @@ bruta} indica el porcentaje de preguntas correctas que produce el generador sin
 revisión; la columna \emph{con revisor}, el porcentaje de correctas entre las
 que el sistema entrega tras descartar las que el revisor rechaza. Las tres
 últimas columnas miden lo bien que el revisor \emph{detecta} las preguntas
-defectuosas, tomando cada rechazo como su forma de marcar una pregunta mala.
+defectuosas, tomando cada rechazo como su forma de marcar una pregunta mala. En
+concreto, la \emph{precisión} es la proporción de rechazos que corresponden a
+preguntas realmente defectuosas ---indica si el revisor se equivoca rechazando
+preguntas buenas---, y la \emph{exhaustividad} (\emph{recall}) es la proporción
+de preguntas defectuosas que el revisor llega a rechazar ---indica cuántas se le
+escapan---; el valor $F_1$ resume ambas en una sola cifra.
 
 \begin{table}[htbp]
   \centering
@@ -70,7 +75,7 @@ defectuosas, tomando cada rechazo como su forma de marcar una pregunta mala.
     \toprule
     & \multicolumn{2}{c}{Calidad de las preguntas} & \multicolumn{3}{c}{Revisor como detector} \\
     \cmidrule(lr){2-3}\cmidrule(lr){4-6}
-    Corpus & Bruta & Con revisor & Precisión & Cobertura & $F_1$ \\
+    Corpus & Bruta & Con revisor & Precisión & Exhaustividad & $F_1$ \\
     \midrule
     Python ($n=36$) & 83\,\% & \textbf{100\,\%} & 67\,\% & 100\,\% & 0{,}80 \\
     Java ($n=20$)   & 80\,\% & 89\,\%           & 100\,\% & 50\,\% & 0{,}67 \\
@@ -91,8 +96,8 @@ descartar de más antes que dejar pasar una defectuosa. Como es el docente quien
 elige finalmente las preguntas, esa cautela no supone un problema.
 
 El comportamiento \textbf{difiere entre lenguajes}. En Python el revisor es muy
-eficaz ($F_1$ = 0{,}80, cobertura del 100\,\%), mientras que en
-Java su cobertura baja al 50\,\%: se le escapan la mitad de las preguntas
+eficaz ($F_1$ = 0{,}80, exhaustividad del 100\,\%), mientras que en
+Java su exhaustividad baja al 50\,\%: se le escapan la mitad de las preguntas
 defectuosas, aunque las que rechaza son siempre defectos reales (precisión del
 100\,\%). Esto apunta a que tanto la generación como la revisión funcionan mejor con
 Python, y deja el soporte de otros lenguajes como una mejora pendiente.
