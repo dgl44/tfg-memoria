@@ -325,7 +325,7 @@ además del analizador de Python se ha implementado uno para Java, de manera que
 el sistema procesa ambos lenguajes sin más cambio que el registro del nuevo
 analizador, lo que evidencia el requisito de extensibilidad (RNF1).
 
-\begin{pythoncode}[title={parser.py --- registro de analizadores por lenguaje}]
+\begin{pythoncode}[title={parser.py --- registro de analizadores por lenguaje}, list entry={\protect\numberline{\thelisting}Registro de analizadores por lenguaje}]
 BackendFn = Callable[[Path], list[UnidadCodigo]]
 
 _BACKENDS: dict[str, BackendFn] = {
@@ -347,6 +347,16 @@ extensión es inferior a cinco líneas. De este modo se descartan funciones
 elementales ---por ejemplo, las que se limitan a devolver un valor--- pero
 se conservan aquellas que, pese a ser breves, incluyen bifurcaciones o
 bucles susceptibles de fundamentar una pregunta.
+
+A este filtrado se añade un segundo descarte, incorporado a raíz de la
+validación con el docente (sección~\ref{sec:res-utilidad}): la exclusión del
+código de \emph{plantilla}. En muchas prácticas el profesorado entrega un
+esqueleto de partida, y evaluar la comprensión de un código que el alumno no ha
+escrito carece de sentido. Para evitarlo, la herramienta admite opcionalmente
+la ruta de esa plantilla; a cada unidad se le asigna una firma a partir de su
+nombre y su código, y se descartan aquellas cuya firma coincide con la de la
+plantilla ---esto es, las que el alumno no ha modificado---, de modo que solo se
+generan preguntas sobre su código propio.
 
 \subsection{Generación y revisión de preguntas}
 \label{sec:impl-agentes}
@@ -371,7 +381,7 @@ opcional (RF7) se refleja en que el equipo se construye condicionalmente.
 El fragmento siguiente resume este ensamblaje ---se omite por
 brevedad la creación de los agentes y de sus tareas---:
 
-\begin{pythoncode}[title={agentes.py --- equipo generador-revisor}]
+\begin{pythoncode}[title={agentes.py --- equipo generador-revisor}, list entry={\protect\numberline{\thelisting}Equipo generador-revisor}]
 agentes = [agente_generador]
 tareas = [tarea_generar]
 # El revisor es opcional (RF7); su ausencia define la variante de ablación.
@@ -393,7 +403,7 @@ porción de texto situada tras la última aparición del marcador
 ventana no se obtiene una conclusión clara, se recurre a un análisis del
 texto completo.
 
-\begin{pythoncode}[title={agentes.py --- deducción del veredicto del revisor}]
+\begin{pythoncode}[title={agentes.py --- deducción del veredicto del revisor}, list entry={\protect\numberline{\thelisting}Deducción del veredicto del revisor}]
 def extraer_veredicto(texto_revisor: str) -> Veredicto:
     texto = texto_revisor.upper()
     pos = texto.rfind("VEREDICTO")
@@ -501,7 +511,7 @@ la herramienta, tal y como lo recibiría el alumno.
 
 \begin{figure}[htbp]
   \centering
-  \fbox{\includegraphics[page=1, width=0.82\textwidth, alt={Primera página de un examen generado: cabecera con el título del examen y los campos de nombre y fecha, seguida de una pregunta de traza de ejecución con su enunciado y el código de la función correspondiente}]{recursos/figuras/examen_ejemplo.pdf}}
+  \fbox{\includegraphics[page=1, width=0.82\textwidth, alt={Primera página de un examen generado: cabecera con el título del examen y los campos de nombre y fecha, seguida de una pregunta de opción múltiple con su enunciado, las cuatro opciones de respuesta y el código de la función correspondiente}]{recursos/figuras/examen_ejemplo.pdf}}
   \caption{Primera página de un examen generado por la herramienta.}
   \label{fig:examen}
 \end{figure}
