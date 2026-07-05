@@ -287,6 +287,9 @@ output/
 # Datos personales (no versionar)
 # contenido/frontmatter/datos-personales.tex
 
+# Resumen del TFG (entregable aparte, no forma parte de la memoria)
+resumen_tfg.tex
+
 # ============================================================================
 # HERRAMIENTAS DE DESARROLLO (.herramientas/)
 # ============================================================================
