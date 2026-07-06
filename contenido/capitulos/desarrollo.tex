@@ -245,6 +245,52 @@ lenguaje (RNF2). El resto del sistema interactúa con él únicamente a través
 de los modelos de datos del dominio, de modo que un posible cambio de
 modelo o de \emph{framework} quedaría limitado a este módulo.
 
+La figura~\ref{fig:equipo-agentes} detalla las entradas y salidas de cada uno
+de los dos agentes que componen este equipo.
+
+\begin{figure}[htbp]
+  \centering
+  \begin{tikzpicture}[
+      node distance=8mm,
+      caja/.style={
+        draw, rounded corners, align=center, text width=6.4cm,
+        minimum height=8mm, font=\small, fill=black!3,
+      },
+      agente/.style={
+        draw, rounded corners, align=center, text width=6.4cm,
+        minimum height=10mm, font=\small, fill=black!8,
+      },
+      lateral/.style={
+        draw, dashed, rounded corners, align=center, text width=3.2cm,
+        minimum height=8mm, font=\footnotesize, fill=black!3,
+      },
+      flecha/.style={->, thick},
+    ]
+    \node[caja] (unidad) {Unidad de código (nombre, código y \emph{docstring})};
+    \node[agente, below=of unidad] (gen) {\textbf{Agente generador}\\Claude Haiku 4.5 (Amazon Bedrock)};
+    \node[caja, below=of gen] (pregunta) {Pregunta generada: enunciado, respuesta y justificación};
+    \node[agente, below=of pregunta] (rev) {\textbf{Agente revisor}\\Claude Haiku 4.5 (Amazon Bedrock)};
+    \node[caja, below=of rev] (veredicto) {Veredicto (aprobación, con sugerencias o rechazo) y comentario};
+    \node[lateral, right=of gen] (contexto) {Contexto académico};
+
+    \draw[flecha] (unidad) -- (gen);
+    \draw[flecha] (gen) -- (pregunta);
+    \draw[flecha] (pregunta) -- (rev);
+    \draw[flecha] (rev) -- (veredicto);
+    \draw[flecha, dashed] (contexto) -- (gen);
+    \draw[flecha, dashed] (contexto.south) |- (rev.east);
+    \draw[flecha, dashed] (unidad.west) to[out=180, in=180] (rev.west);
+  \end{tikzpicture}
+  \caption[Equipo generador-revisor: entradas y salidas de cada agente.]{Equipo
+  generador-revisor: entradas y salidas de cada agente. El agente generador
+  transforma una unidad de código ---condicionado por el contexto académico---
+  en una pregunta; el agente revisor recibe esa pregunta junto con el código de
+  la unidad (flecha discontinua de la izquierda) y el contexto, y emite un
+  veredicto de calidad y un comentario. Ambos agentes se ejecutan de forma
+  secuencial sobre el mismo modelo.}
+  \label{fig:equipo-agentes}
+\end{figure}
+
 \subsection{Configuración académica}
 \label{sec:diseno-contexto}
 
@@ -444,6 +490,33 @@ estructurados, cada uno con su pregunta, su veredicto y el comentario del
 revisor (RF8), que constituye la entrada de la capa de presentación
 encargada de mostrarlos al docente y de generar el examen final.
 
+El siguiente fragmento muestra el núcleo de esta coordinación: el
+reparto rotatorio de los tipos de pregunta y la construcción y ejecución del
+equipo de agentes para cada unidad.
+
+\begin{pythoncode}[title={pipeline.py --- coordinación: una pregunta por unidad}, list entry={\protect\numberline{\thelisting}Coordinación del flujo}]
+for i, unidad in enumerate(a_procesar, start=1):
+    # Reparto rotatorio de los tipos solicitados entre las unidades
+    tipo = tipos[(i - 1) % len(tipos)]
+    crew = construir_crew_para_unidad(unidad, contexto, tipo)
+    salida = crew.kickoff()   # generacion + revision: dos llamadas al modelo
+    resultados.append(_construir_resultado(unidad, tipo, salida))
+\end{pythoncode}
+
+Cada unidad da lugar a \textbf{dos llamadas al modelo de lenguaje} ---una del
+agente generador y otra del revisor---, de modo que el número de llamadas crece
+de forma lineal con el número de preguntas del examen. Sobre el corpus de
+evaluación (56 unidades, sección~\ref{sec:diseno-ablacion}), cada pregunta
+consumió de media unos \textbf{4.900 tokens de entrada y 3.500 de salida} y tardó
+del orden de \textbf{16 segundos} en generarse y revisarse. Con la tarifa de
+Claude Haiku~4.5 en Amazon Bedrock ---1\,\$ por millón de tokens de entrada y
+5\,\$ por millón de salida--- esto supone un coste aproximado de
+\textbf{dos céntimos de dólar por pregunta}: generar el corpus completo de 56
+preguntas costó en torno a 1,3\,\$, un examen de entre 8 y 15 preguntas cuesta
+del orden de 0,20 a 0,35\,\$, y generar diez preguntas para cada uno de 100
+estudiantes rondaría los 23\,\$. Este coste reducido es el que justifica el uso
+de Haiku~4.5 como modelo por defecto de la herramienta (capítulo~\ref{cap:metodologia}).
+
 \subsection{Interfaz web}
 \label{sec:impl-web}
 
@@ -464,6 +537,18 @@ configuración del contexto y la subida del código, una pregunta generada con s
 veredicto y su justificación, y la descarga del examen final. Conviene aclarar
 que, en la interfaz y en el examen resultante, las preguntas de opción múltiple
 aparecen etiquetadas de forma abreviada como «test».
+
+El formulario incorpora además validaciones y un manejo de errores acorde a que
+la generación depende de un servicio externo no determinista (Amazon Bedrock). El
+botón de generación permanece deshabilitado hasta que el docente aporta el
+código del proyecto, y si no se selecciona ningún tipo de pregunta se asume uno
+por defecto. En cuanto a los errores, la interfaz distingue tres situaciones: si
+una unidad concreta falla al generarse o revisarse, se omite y el proceso
+continúa con las demás, de modo que un fallo puntual no invalida todo el examen;
+si la generación falla por completo ---por un problema de conexión o de
+credenciales---, el docente recibe un mensaje explicativo y el detalle técnico
+queda accesible de forma opcional, en lugar de mostrarse un error sin contexto; y
+si el proyecto no contiene unidades evaluables, se le informa del motivo.
 
 \begin{figure}[htbp]
   \centering
@@ -569,16 +654,37 @@ esperado.
 \label{sec:pruebas-funcional}
 
 El sistema completo se ha validado de forma funcional, ejecutándolo de
-extremo a extremo sobre archivos de código de ejemplo y examinando la
-salida producida. Dado que la generación de preguntas depende de un modelo
-de lenguaje cuyo resultado no es determinista, esta verificación no puede
-automatizarse mediante aserciones sobre el contenido exacto de las
-preguntas. En su lugar, se ha comprobado que el sistema completa el flujo
-sin errores y que produce, para cada unidad relevante, una pregunta del
-tipo solicitado acompañada de su veredicto y del comentario del revisor,
-con la estructura esperada. La valoración de si esas preguntas son, además,
-útiles y de calidad ---esto es, su evaluación pedagógica--- se aborda en el
-capítulo~\ref{cap:resultados}.
+extremo a extremo ---desde una carpeta de código de entrada hasta el examen
+exportado--- y examinando la salida producida. Dado que la generación de
+preguntas depende de un modelo de lenguaje cuyo resultado no es determinista,
+esta verificación no puede automatizarse mediante aserciones sobre el contenido
+exacto de las preguntas; en su lugar, se ha ejecutado el sistema sobre código
+real y se ha inspeccionado el resultado.
+
+La verificación se ha realizado sobre las 56 unidades de código que componen el
+corpus del estudio de ablación (sección~\ref{sec:diseno-ablacion})
+---36 en Python y 20 en Java, procedentes de proyectos de prácticas reales---,
+procesadas a través del \gls{pipeline} completo, así como sobre exámenes
+generados y exportados desde la interfaz web (figura~\ref{fig:examen}). En todos
+los casos el sistema completa el flujo y produce, para cada unidad relevante,
+una pregunta del tipo solicitado acompañada de su veredicto y del comentario del
+revisor, con la estructura esperada, y genera correctamente los documentos de
+salida en PDF y Word.
+
+Más allá de comprobar que el flujo termina, esta verificación sacó a la luz dos
+defectos que motivaron cambios en el diseño. En primer lugar, el agente revisor
+rechazaba preguntas correctas alegando que no podía verificar su corrección:
+recibía únicamente el enunciado, pero no el código de la unidad. A raíz de ello
+se modificó el sistema para proporcionar también el código al revisor, tal y
+como se describe en la sección~\ref{sec:diseno-agentes}. En segundo lugar, se
+observó que el generador reproducía en ocasiones el código dentro del propio
+enunciado, lo que lo duplicaba al adjuntarlo la capa de salida; esto llevó a
+incorporar una comprobación que omite el código adjunto cuando el enunciado ya
+lo incluye (sección~\ref{sec:impl-salida}). Ambos hallazgos ilustran el valor de
+la verificación de extremo a extremo frente a las pruebas unitarias aisladas.
+
+La valoración de si esas preguntas son, además, útiles y de calidad ---esto es,
+su evaluación pedagógica--- se aborda en el capítulo~\ref{cap:resultados}.
 
 
 \section{Diseño del estudio de ablación}
@@ -622,9 +728,11 @@ pregunta generada se clasifica según un criterio objetivo: se considera
 corresponde con el código---, si es ambigua ---sin una respuesta única--- o si
 no puede verificarse con el código mostrado. Esta clasificación la realiza un
 modelo de lenguaje externo que actúa como juez imparcial
-(\emph{LLM-as-judge})~\parencite{zheng2023llmjudge}, distinto y más capaz que
-el modelo generador para reducir sesgos, y cuya fiabilidad se contrasta con la
-de un segundo modelo independiente sobre una muestra. El juez
+(\emph{LLM-as-judge})~\parencite{zheng2023llmjudge}: las preguntas se generan
+con \textbf{Claude Haiku~4.5}, el modelo por defecto de la herramienta, y se
+juzgan con \textbf{Claude Sonnet~4.6}, distinto y más capaz que el generador
+para reducir sesgos de autoevaluación. La fiabilidad del juez se contrasta,
+además, con la de un segundo modelo independiente sobre una muestra. El juez
 es independiente del agente revisor: este último forma parte de la generación,
 mientras que el juez interviene solo en la evaluación de los resultados.
 
